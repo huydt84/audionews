@@ -1,0 +1,7 @@
+psycopg2-binary
+celery
+beautifulsoup4
+feedparser
+requests
+sqlalchemy
+python-dateutil

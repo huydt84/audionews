@@ -1,0 +1,4 @@
+schedule
+celery
+feedparser
+bs4

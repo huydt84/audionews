@@ -1,0 +1,124 @@
+version: "3.7"
+
+networks:
+  app-tier:
+
+volumes:
+  db-data:
+
+services:
+  backend:
+    build: ./etl_service
+    # command: ["python", "-u", "/app/manage.py", "runserver","0.0.0.0:8000" ]
+    volumes:
+      - ./backend/app:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - CELERY_BROKER_URL=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASSWORD:-password}@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASSWORD:-password}@rabbitmq:5672//
+      - CELERY_TASK=${CELERY_TASK:-tasks.something}
+      - CELERY_ACKS_LATE=${CELERY_ACKS_LATE:-1}
+      - CELERYD_PREFETCH_MULTIPLIER=${CELERYD_PREFETCH_MULTIPLIER:-1}
+      - X_MAX_PRIORITY=${X_MAX_PRIORITY:-10}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-tier
+
+  db:
+    image: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-tier
+
+  worker:
+    build: ./celery
+    # command:   python -m http.server
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - CELERY_BROKER_URL=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASSWORD:-password}@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASSWORD:-password}@rabbitmq:5672//
+      - CELERY_TASK=${CELERY_TASK:-tasks.something}
+      - CELERY_ACKS_LATE=${CELERY_ACKS_LATE:-1}
+      - CELERYD_PREFETCH_MULTIPLIER=${CELERYD_PREFETCH_MULTIPLIER:-1}
+      - X_MAX_PRIORITY=${X_MAX_PRIORITY:-10}
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-tier
+    ports:
+      - 3000:3000
+
+  rabbitmq:
+    build:
+      context: ./rabbitmq
+      args:
+        - RABBITMQ_USER=${RABBITMQ_USER:-user}
+        - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-password}
+    environment:
+      - RABBITMQ_PID_FILE=${RABBITMQ_PID_FILE:-/var/lib/rabbitmq/mnesia/rabbitmq}
+    ports:
+      - 15672:15672
+    networks:
+      - app-tier
+
+  tts_service:
+    build: ./tts_service
+    command:
+      [
+        "uvicorn",
+        "main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "3000",
+        "--reload"
+      ]
+    ports:
+      - "8080:3000"
+    volumes:
+      - ./tts_service/app:/app
+    depends_on:
+      - db
+    networks:
+      - app-tier
+
+  flower:
+    image: mher/flower
+    environment: 
+      - CELERY_BROKER_URL=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASSWORD:-password}@rabbitmq:5672//
+      - FLOWER_PORT=5555
+    ports:
+      - 5555:5555
+    networks:
+      - app-tier
+
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - 5050:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    depends_on:
+      - db
+    networks:
+      - app-tier
