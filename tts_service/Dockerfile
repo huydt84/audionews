@@ -1,0 +1,13 @@
+FROM python:3.7.7-slim
+
+ENV LANG="C.UTF-8"
+
+COPY ./requirements.txt /tmp/requirements.txt
+
+RUN python -m pip install -U --no-cache-dir pip && pip install --no-cache-dir --upgrade -r /tmp/requirements.txt
+
+WORKDIR /app
+
+COPY ./app /app
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "3000"]

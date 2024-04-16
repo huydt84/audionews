@@ -1,4 +1,3 @@
-from celery import Celery
 import time
 import datetime
 import schedule
@@ -6,10 +5,9 @@ import requests
 import feedparser
 from bs4 import BeautifulSoup
 
+from worker import celery
+from config import config
 
-app = Celery('crawler',
-            broker='amqp://admin:mypass@rabbit:5672',
-            backend='rpc://')
 
 class Article:
     def __init__(self, title, url, published, category):
@@ -58,6 +56,12 @@ def etl_vnexpress():
             article.content += paragraph.get_text()
             article.content += "\n"
 
+        celery.send_task(config["CELERY_TASK"], 
+                        args=[article.title, article.url, article.category, article.published, article.content],
+                        queue="tasks")
+
+    return list_article
+
 def etl_dantri():
     news = process_rss("https://dantri.com.vn/rss/su-kien.rss", "news")
     world = process_rss("https://dantri.com.vn/rss/the-gioi.rss", "world")
@@ -79,6 +83,12 @@ def etl_dantri():
             article.content += paragraph.get_text()
             article.content += "\n"
 
+        celery.send_task(config["CELERY_TASK"], 
+                        args=[article.title, article.url, article.category, article.published, article.content],
+                        queue="tasks")
+
+    return list_article
+
 def etl_vtcnews():
     news = process_rss("https://vtcnews.vn/rss/thoi-su.rss", "news")
     world = process_rss("https://vtcnews.vn/rss/the-gioi.rss", "world")
@@ -99,6 +109,12 @@ def etl_vtcnews():
         for paragraph in soup.find_all('p'):
             article.content += paragraph.get_text()
             article.content += "\n"
+
+        celery.send_task(config["CELERY_TASK"], 
+                        args=[article.title, article.url, article.category, article.published, article.content],
+                        queue="tasks")
+
+    return list_article
 
 def etl_thanhnien():
     news = process_rss("https://thanhnien.vn/rss/thoi-su.rss", "news")
@@ -123,6 +139,12 @@ def etl_thanhnien():
             article.content += paragraph.get_text()
             article.content += "\n"
 
+        celery.send_task(config["CELERY_TASK"], 
+                        args=[article.title, article.url, article.category, article.published, article.content],
+                        queue="tasks")
+
+    return list_article
+
 def etl_tienphong():
     news = process_rss("https://tienphong.vn/rss/thoi-su-421.rss", "news")
     world = process_rss("https://tienphong.vn/rss/the-gioi-5.rss", "world")
@@ -145,3 +167,19 @@ def etl_tienphong():
 
             article.content += paragraph.get_text()
             article.content += "\n"
+
+        celery.send_task(config["CELERY_TASK"], 
+                        args=[article.title, article.url, article.category, article.published, article.content],
+                        queue="tasks")
+
+    return list_article
+
+def crawl():
+    etl_vnexpress()
+    etl_thanhnien()
+    etl_dantri()
+    etl_tienphong()
+    etl_vtcnews()
+
+schedule.every().hour.do(crawl)
+        

@@ -10,4 +10,4 @@ COPY ./app /app/
 
 WORKDIR /app
 
-CMD ["python", "scheduler.py"]
+CMD ["python", "crawler.py"]

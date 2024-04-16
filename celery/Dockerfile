@@ -10,7 +10,8 @@ COPY ./app /app/
 
 WORKDIR /app
 
-CMD celery -A tasks worker \
-    --concurrency=3 \
-    --loglevel=INFO \
-    -B
+ADD docker_entrypoint.sh /docker_entrypoint.sh
+
+RUN chmod +x /docker_entrypoint.sh
+
+CMD ["/docker_entrypoint.sh"]

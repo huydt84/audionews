@@ -7,11 +7,11 @@ volumes:
   db-data:
 
 services:
-  backend:
+  etl_service:
     build: ./etl_service
     # command: ["python", "-u", "/app/manage.py", "runserver","0.0.0.0:8000" ]
     volumes:
-      - ./backend/app:/app
+      - ./etl_service/app:/app
     ports:
       - "8000:8000"
     environment:
@@ -60,6 +60,7 @@ services:
       - X_MAX_PRIORITY=${X_MAX_PRIORITY:-10}
     depends_on:
       - rabbitmq
+      - db
     networks:
       - app-tier
     ports:
