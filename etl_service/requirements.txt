@@ -3,3 +3,4 @@ celery==4.4.7
 feedparser
 bs4
 requests
+python-dateutil

@@ -2,12 +2,22 @@ import sqlalchemy
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import create_engine, MetaData, Table, String, Integer, Text, Column, DateTime
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy_utils.functions import database_exists, create_database
 from config import config
 from models import news_category
+
+# if not sqlalchemy_utils.functions.database_exists(f'postgresql://{config["POSTGRES_USER"]}@{config["POSTGRES_HOST"]}/{config["POSTGRES_DB"]}')
+print(111111111111111111111)
 
 engine = create_engine((f'postgresql+psycopg2://{config["POSTGRES_USER"]}:'
             f'{config["POSTGRES_PASSWORD"]}@{config["POSTGRES_HOST"]}:'
             f'{config["POSTGRES_PORT"]}/{config["POSTGRES_DB"]}'))
+
+if not database_exists(engine.url):
+    print("Init database")
+    create_database(engine.url)
+else:
+    print("Database exists")
 
 meta = MetaData()
 
