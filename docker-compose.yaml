@@ -5,13 +5,14 @@ networks:
 
 volumes:
   db-data:
+  audio-data:
 
 services:
   etl_service:
     build: ./etl_service
     # command: ["python", "-u", "/app/manage.py", "runserver","0.0.0.0:8000" ]
-    volumes:
-      - ./etl_service/app:/app
+    # volumes:
+    #   - ./etl_service/app:/app
     ports:
       - "8000:8000"
     environment:
@@ -94,7 +95,28 @@ services:
     ports:
       - "8080:3000"
     volumes:
-      - ./tts_service/app:/app
+      - audio-data:/app/audio
+    depends_on:
+      - db
+    networks:
+      - app-tier
+
+  backend:
+    build: ./backend
+    command:
+      [
+        "uvicorn",
+        "main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "3000",
+        "--reload"
+      ]
+    ports:
+      - "5678:3000"
+    volumes:
+      - audio-data:/app/audio
     depends_on:
       - db
     networks:

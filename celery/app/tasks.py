@@ -32,7 +32,7 @@ tts_api = "http://tts_service:3000/tts"
 def tts(self, title, url, category, published, content):
     # Create folder
     folder_name = str(uuid.uuid4())
-    os.mkdir(f"audio/{folder_name}")
+    # os.mkdir(f"audio/{folder_name}")
 
     # Save to database
     data = Article(
@@ -48,24 +48,26 @@ def tts(self, title, url, category, published, content):
     session.commit()
 
     # Get audio
-    response = requests.post(url=f"{tts_api}/male-north", json={"content": content}, timeout=20)
-    print(len(response.content))
-    if response.status_code == 200:
-        with open(f"audio/{folder_name}/male-north.wav", "wb") as f:
-            f.write(response.content)
+    response = requests.post(url=tts_api, json={"content": content, "folder_name": folder_name}, timeout=20)
+    while response.status_code != 200:
+        response = requests.post(url=tts_api, json={"content": content, "folder_name": folder_name}, timeout=20)
+    # print(len(response.content))
+    # if response.status_code == 200:
+    #     with open(f"audio/{folder_name}/male-north.wav", "wb") as f:
+    #         f.write(response.content)
 
-    response = requests.post(url=f"{tts_api}/female-north", json={"content": content}, timeout=20)
-    if response.status_code == 200:
-        with open(f"audio/{folder_name}/female-north.wav", "wb") as f:
-            f.write(response.content)
+    # response = requests.post(url=f"{tts_api}/female-north", json={"content": content}, timeout=20)
+    # if response.status_code == 200:
+    #     with open(f"audio/{folder_name}/female-north.wav", "wb") as f:
+    #         f.write(response.content)
 
-    response = requests.post(url=f"{tts_api}/male-south", json={"content": content}, timeout=20)
-    if response.status_code == 200:
-        with open(f"audio/{folder_name}/male-south.wav", "wb") as f:
-            f.write(response.content)
+    # response = requests.post(url=f"{tts_api}/male-south", json={"content": content}, timeout=20)
+    # if response.status_code == 200:
+    #     with open(f"audio/{folder_name}/male-south.wav", "wb") as f:
+    #         f.write(response.content)
 
-    response = requests.post(url=f"{tts_api}/female-south", json={"content": content}, timeout=20)
-    if response.status_code == 200:
-        with open(f"audio/{folder_name}/female-south.wav", "wb") as f:
-            f.write(response.content)
+    # response = requests.post(url=f"{tts_api}/female-south", json={"content": content}, timeout=20)
+    # if response.status_code == 200:
+    #     with open(f"audio/{folder_name}/female-south.wav", "wb") as f:
+    #         f.write(response.content)
 

@@ -34,6 +34,3 @@ class Article(Base):
     path_audio = Column(String(255))
     written_at = Column(DateTime)
     created_at = Column(DateTime, server_default=func.now())
-
-
-
