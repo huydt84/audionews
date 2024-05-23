@@ -30,6 +30,8 @@ articles = Table(
     Column("title", String),
     Column("category", sqlalchemy.Enum(news_category)),
     Column("content", Text),
+    Column("image_url", Text),
+    Column("description", Text),
     Column("path_audio", String),
     Column("written_at", DateTime),
     Column("created_at", DateTime)

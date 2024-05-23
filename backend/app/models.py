@@ -31,6 +31,8 @@ class Article(Base):
     title = Column(String(255))
     category = Column(sqlalchemy.Enum(news_category))
     content = Column(Text)
+    image_url = Column(Text)
+    description = Column(Text)
     path_audio = Column(String(255))
     written_at = Column(DateTime)
     created_at = Column(DateTime, server_default=func.now())

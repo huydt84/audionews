@@ -11,12 +11,14 @@ from config import config
 
 
 class Article:
-    def __init__(self, title, url, published, category):
+    def __init__(self, title, url, published, category, image_url, description):
         self.title = title
         self.url = url
         self.category = category
         self.published = published
         self.content = ""
+        self.image_url = image_url
+        self.description = description
 
 
 def process_rss(rss_site: str, category: str):
@@ -25,12 +27,18 @@ def process_rss(rss_site: str, category: str):
     now = datetime.datetime.now()
     list_article = []
     for entry in NewsFeed.entries:
+        # Get time
         time_published = parse(entry.published)
         time_published = time_published.replace(tzinfo=None)
         if now - time_published >= datetime.timedelta(hours=1):
             break
 
-        article = Article(entry.title, entry.link, time_published, category)
+        # Get description
+        description_html = entry.get('description', '')
+        soup = BeautifulSoup(description_html, 'html.parser')
+        description = soup.get_text()
+
+        article = Article(entry.title, entry.link, time_published, category, entry.links[-1].href, description)
         list_article.append(article)
 
     return list_article
@@ -60,7 +68,7 @@ def etl_vnexpress():
             article.content += "\n"
 
         celery.send_task(config["CELERY_TASK"], 
-                        args=[article.title, article.url, article.category, article.published, article.content],
+                        args=[article.title, article.url, article.category, article.published, article.content, article.image_url, article.description],
                         queue="tasks")
 
     return list_article
@@ -89,7 +97,7 @@ def etl_dantri():
             article.content += "\n"
 
         celery.send_task(config["CELERY_TASK"], 
-                        args=[article.title, article.url, article.category, article.published, article.content],
+                        args=[article.title, article.url, article.category, article.published, article.content, article.image_url, article.description],
                         queue="tasks")
 
     return list_article
@@ -118,7 +126,7 @@ def etl_vtcnews():
             article.content += "\n"
 
         celery.send_task(config["CELERY_TASK"], 
-                        args=[article.title, article.url, article.category, article.published, article.content],
+                        args=[article.title, article.url, article.category, article.published, article.content, article.image_url, article.description],
                         queue="tasks")
 
     return list_article
@@ -149,7 +157,7 @@ def etl_thanhnien():
             article.content += "\n"
 
         celery.send_task(config["CELERY_TASK"], 
-                        args=[article.title, article.url, article.category, article.published, article.content],
+                        args=[article.title, article.url, article.category, article.published, article.content, article.image_url, article.description],
                         queue="tasks")
 
     return list_article
@@ -180,7 +188,7 @@ def etl_tienphong():
             article.content += "\n"
 
         celery.send_task(config["CELERY_TASK"], 
-                        args=[article.title, article.url, article.category, article.published, article.content],
+                        args=[article.title, article.url, article.category, article.published, article.content, article.image_url, article.description],
                         queue="tasks")
 
     return list_article

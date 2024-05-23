@@ -29,7 +29,7 @@ session = Session()
 tts_api = "http://tts_service:3000/tts"
 
 @celery.task(name=config["CELERY_TASK"], queue='tasks', bind=True)
-def tts(self, title, url, category, published, content):
+def tts(self, title, url, category, published, content, image_url, description):
     # Create folder
     folder_name = str(uuid.uuid4())
     # os.mkdir(f"audio/{folder_name}")
@@ -40,6 +40,8 @@ def tts(self, title, url, category, published, content):
         title=title,
         category=category,
         content=content,
+        image_url=image_url,
+        description=description,
         path_audio=folder_name,
         written_at = published
     )
@@ -48,9 +50,9 @@ def tts(self, title, url, category, published, content):
     session.commit()
 
     # Get audio
-    response = requests.post(url=tts_api, json={"content": content, "folder_name": folder_name}, timeout=20)
+    response = requests.post(url=tts_api, json={"content": content, "folder_name": folder_name})
     while response.status_code != 200:
-        response = requests.post(url=tts_api, json={"content": content, "folder_name": folder_name}, timeout=20)
+        response = requests.post(url=tts_api, json={"content": content, "folder_name": folder_name})
     # print(len(response.content))
     # if response.status_code == 200:
     #     with open(f"audio/{folder_name}/male-north.wav", "wb") as f:

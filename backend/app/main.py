@@ -31,21 +31,25 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/api/news")
 async def get_all():
-    articles = sql_session["session"].query(Article.id, Article.title).all()
+    articles = sql_session["session"].query(Article.id, Article.title, Article.link_source, Article.image_url, Article.description, Article.written_at).all()
 
     news = []
-    for id, title in articles:
-        news.append({"id": id, "title": title})
+    for id, title, link_source, image_url, description, written_at in articles:
+        news.append({"id": id, "title": title, "link_source": link_source,
+                     "image_url": image_url, "description": description,
+                     "written_at": written_at.strftime("%m/%d/%Y, %H:%M:%S")})
 
     return {"message": news}
 
 @app.get("/api/news/category/{category}")
 async def get_all_category(category: str):
-    articles = sql_session["session"].query(Article.id, Article.title).filter(Article.category == category).all()
+    articles = sql_session["session"].query(Article.id, Article.title, Article.link_source, Article.image_url, Article.description, Article.written_at).filter(Article.category == category).all()
 
     news = []
-    for id, title in articles:
-        news.append({"id": id, "title": title})
+    for id, title, link_source, image_url, description, written_at in articles:
+        news.append({"id": id, "title": title, "link_source": link_source,
+                     "image_url": image_url, "description": description,
+                     "written_at": written_at.strftime("%m/%d/%Y, %H:%M:%S")})
 
     return {"message": news}
 
