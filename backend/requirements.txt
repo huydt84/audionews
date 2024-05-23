@@ -4,4 +4,3 @@ pydantic
 python-multipart
 sqlalchemy
 psycopg2-binary
-fastapi-pagination

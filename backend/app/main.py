@@ -3,8 +3,6 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 
-from fastapi_pagination import Page, add_pagination, paginate
-
 import os
 from typing import Literal
 
@@ -54,7 +52,7 @@ app = FastAPI(lifespan=lifespan)
 @app.get("/api/news")
 async def get_all():
     articles = sql_session["session"].query(Article.id, Article.title, Article.link_source, Article.image_url, Article.description, Article.slug_url, Article.written_at) \
-                                    .all().order_by(Article.id.desc())
+                                    .order_by(Article.id.desc()).all()
 
     news = []
     for id, title, link_source, image_url, description, slug_url, written_at in articles:
@@ -65,12 +63,12 @@ async def get_all():
                      "site_name": site_name, "logo_url": logo_url,
                      "written_at": written_at.strftime("%m/%d/%Y, %H:%M:%S")})
 
-    return {"message": paginate(news)}
+    return {"message": news}
 
 @app.get("/api/news/category/{category}")
 async def get_all_category(category: str):
     articles = sql_session["session"].query(Article.id, Article.title, Article.link_source, Article.image_url, Article.description, Article.slug_url, Article.written_at) \
-                                    .filter(Article.category == category).all().order_by(Article.id.desc())
+                                    .filter(Article.category == category).order_by(Article.id.desc()).all()
 
     news = []
     for id, title, link_source, image_url, description, slug_url, written_at in articles:
@@ -81,12 +79,12 @@ async def get_all_category(category: str):
                      "site_name": site_name, "logo_url": logo_url,
                      "written_at": written_at.strftime("%m/%d/%Y, %H:%M:%S")})
 
-    return {"message": paginate(news)}
+    return {"message": news}
 
 @app.get("/api/news/{slug_url}")
 async def get_one(slug_url: str):
     articles = sql_session["session"].query(Article.id, Article.title, Article.link_source, Article.content, Article.slug_url, Article.written_at) \
-                                    .filter(Article.slug_url == slug_url).all().order_by(Article.id.desc())
+                                    .filter(Article.slug_url == slug_url).order_by(Article.id.desc()).all()
 
     news = []
     for id, title, link_source, content, slug, written_at in articles:
@@ -98,9 +96,14 @@ async def get_one(slug_url: str):
                      "audio_male-south": f"/api/news/audio/{id}/male-south",
                      "audio_female-south": f"/api/news/audio/{id}/female-south",
                      "audio_female-central": f"/api/news/audio/{id}/female-central",
-                     "written_at": written_at.strftime("%m/%d/%Y, %H:%M:%S")})
+                     "written_at": written_at.strftime("%m/%d/%Y, %H:%M:%S"),
+                     "pagination": [
+                         {
+                             "total": len(articles)
+                         }
+                     ]})
 
-    return {"message": paginate(news)}
+    return {"message": news}
 
 @app.get("/api/news/audio/{id}/{voice}")
 async def get_audio(id: int, voice: Literal["male-north", "female-north", "male-south", "female-south", "female-central"]):
@@ -109,5 +112,3 @@ async def get_audio(id: int, voice: Literal["male-north", "female-north", "male-
     audio_path = os.path.join("audio", folder_path[0], file_name)
 
     return FileResponse(audio_path)
-
-add_pagination(app)
