@@ -38,7 +38,11 @@ def process_rss(rss_site: str, category: str):
         soup = BeautifulSoup(description_html, 'html.parser')
         description = soup.get_text()
 
-        article = Article(entry.title, entry.link, time_published, category, entry.links[-1].href, description)
+        # Get image url
+        img_tag = soup.find('img')
+        img_url = img_tag['src'] if img_tag else ""
+
+        article = Article(entry.title, entry.link, time_published, category, img_url, description)
         list_article.append(article)
 
     return list_article
@@ -199,7 +203,7 @@ def crawl():
     etl_thanhnien()
     etl_dantri()
     etl_tienphong()
-    etl_vtcnews()
+    # etl_vtcnews()
 
 # For testing
 crawl()
