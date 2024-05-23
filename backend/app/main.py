@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 
@@ -111,4 +111,8 @@ async def get_audio(id: int, voice: Literal["male-north", "female-north", "male-
     file_name = voice + ".wav"
     audio_path = os.path.join("audio", folder_path[0], file_name)
 
-    return FileResponse(audio_path)
+    def iterfile():
+        with open(audio_path, mode="rb") as file:
+            yield from file
+
+    return StreamingResponse(iterfile(), media_type="audio/mpeg")
