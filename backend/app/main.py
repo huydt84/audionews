@@ -15,6 +15,26 @@ from sqlalchemy.orm import sessionmaker
 from config import config
 from models import Article
 
+def get_site_logo(link_source):
+    if "https://vnexpress.net" in link_source:
+        site_name = "VnExpress"
+        logo_url = os.environ.get("VNEXPRESS_LOGO_URL", "")
+    elif "https://dantri.com.vn" in link_source:
+        site_name = "Dân trí"
+        logo_url = os.environ.get("DANTRI_LOGO_URL", "")
+    elif "https://tienphong.vn" in link_source:
+        site_name = "Tiền Phong"
+        logo_url = os.environ.get("TIENPHONG_LOGO_URL", "")
+    elif "https://thanhnien.vn" in link_source:
+        site_name = "Thanh Niên"
+        logo_url = os.environ.get("THANHNIEN_LOGO_URL", "")
+    else: 
+        site_name = ""
+        logo_url = ""
+
+    return site_name, logo_url
+    
+
 sql_session = {}
 
 @asynccontextmanager
@@ -38,9 +58,11 @@ async def get_all():
 
     news = []
     for id, title, link_source, image_url, description, slug_url, written_at in articles:
+        site_name, logo_url = get_site_logo(link_source)
         news.append({"id": id, "title": title, "link_source": link_source,
                      "image_url": image_url, "description": description,
                      "slug_url": slug_url,
+                     "site_name": site_name, "logo_url": logo_url,
                      "written_at": written_at.strftime("%m/%d/%Y, %H:%M:%S")})
 
     return {"message": paginate(news)}
@@ -52,9 +74,11 @@ async def get_all_category(category: str):
 
     news = []
     for id, title, link_source, image_url, description, slug_url, written_at in articles:
+        site_name, logo_url = get_site_logo(link_source)
         news.append({"id": id, "title": title, "link_source": link_source,
                      "image_url": image_url, "description": description,
                      "slug_url": slug_url,
+                     "site_name": site_name, "logo_url": logo_url,
                      "written_at": written_at.strftime("%m/%d/%Y, %H:%M:%S")})
 
     return {"message": paginate(news)}
@@ -66,7 +90,9 @@ async def get_one(slug_url: str):
 
     news = []
     for id, title, link_source, content, slug, written_at in articles:
-        news.append({"id": id, "title": title, "link_source": link_source, "content": content, "slug_url": slug,
+        site_name, logo_url = get_site_logo(link_source)
+        news.append({"id": id, "title": title, "link_source": link_source, "content": content, 
+                     "slug_url": slug, "site_name": site_name, "logo_url": logo_url,
                      "audio_male-north": f"/api/news/audio/{id}/male-north",
                      "audio_female-north": f"/api/news/audio/{id}/female-north",
                      "audio_male-south": f"/api/news/audio/{id}/male-south",
