@@ -1,13 +1,10 @@
 import sqlalchemy
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import create_engine, MetaData, Table, String, Integer, Text, Column, DateTime
+from sqlalchemy import create_engine, MetaData, Table, String, Integer, Text, Column, DateTime, Index
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils.functions import database_exists, create_database
 from config import config
 from models import news_category
-
-# if not sqlalchemy_utils.functions.database_exists(f'postgresql://{config["POSTGRES_USER"]}@{config["POSTGRES_HOST"]}/{config["POSTGRES_DB"]}')
-print(111111111111111111111)
 
 engine = create_engine((f'postgresql+psycopg2://{config["POSTGRES_USER"]}:'
             f'{config["POSTGRES_PASSWORD"]}@{config["POSTGRES_HOST"]}:'
@@ -32,9 +29,11 @@ articles = Table(
     Column("content", Text),
     Column("image_url", Text),
     Column("description", Text),
+    Column("slug_url", Text),
     Column("path_audio", String),
     Column("written_at", DateTime),
-    Column("created_at", DateTime)
+    Column("created_at", DateTime),
+    Index('idx_slug_url', 'slug_url')
 )
 
 meta.create_all(engine)

@@ -33,6 +33,7 @@ class Article(Base):
     content = Column(Text)
     image_url = Column(Text)
     description = Column(Text)
+    slug_url = Column(Text)
     path_audio = Column(String(255))
     written_at = Column(DateTime)
     created_at = Column(DateTime, server_default=func.now())

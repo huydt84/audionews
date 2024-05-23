@@ -7,3 +7,4 @@ sqlalchemy
 sqlalchemy-utils
 python-dateutil
 pytz
+shortuuid

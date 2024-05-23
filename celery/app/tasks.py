@@ -12,6 +12,7 @@ import requests
 from config import config
 from worker import celery
 from models import Article
+from utils import slug
 
 # Tạo logger
 logger = logging.getLogger(__name__)
@@ -42,6 +43,7 @@ def tts(self, title, url, category, published, content, image_url, description):
         content=content,
         image_url=image_url,
         description=description,
+        slug_url=slug(title),
         path_audio=folder_name,
         written_at = published
     )
