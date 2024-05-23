@@ -32,6 +32,9 @@ async def tts(article: Article):
     with open(f"audio/{article.folder_name}/female-south.wav", "wb") as f:
         f.write(audio)
 
+    with open(f"audio/{article.folder_name}/female-central.wav", "wb") as f:
+        f.write(audio)
+
     return {"message": "success!"}
 
 
