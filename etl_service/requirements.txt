@@ -4,3 +4,4 @@ feedparser
 bs4
 requests
 python-dateutil
+ftfy

@@ -5,6 +5,7 @@ import schedule
 import requests
 import feedparser
 from bs4 import BeautifulSoup
+import ftfy
 
 from worker import celery
 from config import config
@@ -21,12 +22,16 @@ class Article:
         self.description = description
 
 
-def process_rss(rss_site: str, category: str):
+def process_rss(rss_site: str, category: str, fix_text: bool = False):
     NewsFeed = feedparser.parse(rss_site)
     
     now = datetime.datetime.now()
     list_article = []
     for entry in NewsFeed.entries:
+        # Get title and url
+        title = entry.title
+        url = entry.link
+
         # Get time
         time_published = parse(entry.published)
         time_published = time_published.replace(tzinfo=None)
@@ -42,7 +47,12 @@ def process_rss(rss_site: str, category: str):
         img_tag = soup.find('img')
         img_url = img_tag['src'] if img_tag else ""
 
-        article = Article(entry.title, entry.link, time_published, category, img_url, description)
+        # Fix text (for thanhnien)
+        if fix_text:
+            title = ftfy.fix_text(title)
+            description = ftfy.fix_text(description)
+
+        article = Article(title, url, time_published, category, img_url, description)
         list_article.append(article)
 
     return list_article
@@ -136,15 +146,15 @@ def etl_vtcnews():
     return list_article
 
 def etl_thanhnien():
-    news = process_rss("https://thanhnien.vn/rss/thoi-su.rss", "news")
-    world = process_rss("https://thanhnien.vn/rss/the-gioi.rss", "world")
-    # life = process_rss("https://thanhnien.vn/rss/doi-song.rss", "life")
-    # health = process_rss("https://thanhnien.vn/rss/suc-khoe.rss", "health")
-    # economy = process_rss("https://thanhnien.vn/rss/kinh-te.rss", "economy")
-    # vehicle = process_rss("https://thanhnien.vn/rss/xe.rss", "vehicle")
-    education = process_rss("https://thanhnien.vn/rss/giao-duc.rss", "education")
-    sport = process_rss("https://thanhnien.vn/rss/the-thao.rss", "sport")
-    # youth = process_rss("https://thanhnien.vn/rss/gioi-tre.rss", "youth")
+    news = process_rss("https://thanhnien.vn/rss/thoi-su.rss", "news", fix_text=True)
+    world = process_rss("https://thanhnien.vn/rss/the-gioi.rss", "world", fix_text=True)
+    # life = process_rss("https://thanhnien.vn/rss/doi-song.rss", "life", fix_text=True)
+    # health = process_rss("https://thanhnien.vn/rss/suc-khoe.rss", "health", fix_text=True)
+    # economy = process_rss("https://thanhnien.vn/rss/kinh-te.rss", "economy", fix_text=True)
+    # vehicle = process_rss("https://thanhnien.vn/rss/xe.rss", "vehicle", fix_text=True)
+    education = process_rss("https://thanhnien.vn/rss/giao-duc.rss", "education", fix_text=True)
+    sport = process_rss("https://thanhnien.vn/rss/the-thao.rss", "sport", fix_text=True)
+    # youth = process_rss("https://thanhnien.vn/rss/gioi-tre.rss", "youth", fix_text=True)
 
     # list_article = news + world + life + health + economy + vehicle + education + sport + youth
     list_article = news + world + education + sport
