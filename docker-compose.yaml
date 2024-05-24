@@ -1,4 +1,4 @@
-version: "3.7"
+version: '3.7'
 
 networks:
   app-tier:
@@ -14,7 +14,7 @@ services:
     # volumes:
     #   - ./etl_service/app:/app
     ports:
-      - "8000:8000"
+      - '8000:8000'
     environment:
       - CELERY_BROKER_URL=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASSWORD:-password}@rabbitmq:5672//
       - CELERY_RESULT_BACKEND=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASSWORD:-password}@rabbitmq:5672//
@@ -30,6 +30,8 @@ services:
 
   db:
     image: postgres
+    ports:
+      - '5432:5432'
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:
@@ -84,18 +86,9 @@ services:
 
   tts_service:
     build: ./tts_service
-    command:
-      [
-        "uvicorn",
-        "main:app",
-        "--host",
-        "0.0.0.0",
-        "--port",
-        "3000",
-        "--reload"
-      ]
+    command: ['uvicorn', 'main:app', '--host', '0.0.0.0', '--port', '3000', '--reload']
     ports:
-      - "8080:3000"
+      - '8080:3000'
     volumes:
       - audio-data:/app/audio
     depends_on:
@@ -105,18 +98,9 @@ services:
 
   backend:
     build: ./backend
-    command:
-      [
-        "uvicorn",
-        "main:app",
-        "--host",
-        "0.0.0.0",
-        "--port",
-        "3000",
-        "--reload"
-      ]
+    command: ['uvicorn', 'main:app', '--host', '0.0.0.0', '--port', '3000', '--reload']
     ports:
-      - "5678:3000"
+      - '5678:3000'
     volumes:
       - audio-data:/app/audio
     environment:
@@ -130,16 +114,15 @@ services:
     networks:
       - app-tier
 
-  # flower:
-  #   image: mher/flower
-  #   environment: 
-  #     - CELERY_BROKER_URL=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASSWORD:-password}@rabbitmq:5672//
-  #     - FLOWER_PORT=5555
-  #   ports:
-  #     - 5555:5555
-  #   networks:
-  #     - app-tier
-
+  flower:
+    image: mher/flower
+    environment:
+      - CELERY_BROKER_URL=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASSWORD:-password}@rabbitmq:5672//
+      - FLOWER_PORT=5555
+    ports:
+      - 5555:5555
+    networks:
+      - app-tier
 
   pgadmin:
     image: dpage/pgadmin4
@@ -151,5 +134,14 @@ services:
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     depends_on:
       - db
+    networks:
+      - app-tier
+
+  web:
+    build: ./web
+    ports:
+      - '3500:3000'
+    depends_on:
+      - backend
     networks:
       - app-tier
