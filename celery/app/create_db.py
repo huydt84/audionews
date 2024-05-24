@@ -3,6 +3,7 @@ import sqlalchemy
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import create_engine, MetaData, Table, String, Integer, Text, Column, DateTime, Index, text
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql import func
 from sqlalchemy_utils.functions import database_exists, create_database
 from config import config
 from models import news_category
@@ -33,7 +34,7 @@ articles = Table(
     Column("slug_url", Text),
     Column("path_audio", String),
     Column("written_at", DateTime),
-    Column("created_at", DateTime),
+    Column("created_at", DateTime, server_default=func.now()),
     Index('idx_slug_url', 'slug_url')
 )
 
@@ -49,13 +50,6 @@ meta.create_all(engine)
 # Init admin account
 username = os.environ.get("ADMIN_USERNAME", "admin")
 password = os.environ.get("ADMIN_PASSWORD", "1111")
-# with engine.connect() as connection:
-#     try:
-#         result = connection.execute(text("INSERT INTO admin (username, password) VALUES (:username, :password)"), {"username": username, "password": password})
-#         print("Init admin account")
-#     except Exception as e:
-#         print(e)
-#         print("Account existed")
 with conn.begin():
     try:
         conn.execute(admin.insert(), {"username": username, "password": password})

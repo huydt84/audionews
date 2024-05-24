@@ -133,6 +133,58 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 
+@app.get("/api/statistic")
+async def statistic(current_user: User = Depends(get_current_user)):
+    articles = sql_session["session"].query(Article.id, Article.link_source, Article.category).all()
+
+    sites = {}
+    categories = {}
+    for id, link_source, category in articles:
+        site_name, _ = get_site_logo(link_source)
+        if site_name in sites:
+            sites[site_name] += 1
+        else:
+            sites[site_name] = 1
+
+        if category in categories:
+            categories[category] += 1
+        else:
+            categories[category] = 1
+
+    return {"message": "Get all-time statistics successfully",
+            "data": {
+                "all": len(articles),
+                "categories": categories,
+                "sites": sites
+            }}
+
+@app.get("/api/statistic/last")
+async def statistic(hour: int = 1, current_user: User = Depends(get_current_user)):
+    articles = sql_session["session"].query(Article.id, Article.link_source, Article.category) \
+                                    .filter(Article.created_at + timedelta(hours=hour) > datetime.now()).all()
+
+    sites = {}
+    categories = {}
+    for id, link_source, category in articles:
+        site_name, _ = get_site_logo(link_source)
+        if site_name in sites:
+            sites[site_name] += 1
+        else:
+            sites[site_name] = 1
+
+        if category in categories:
+            categories[category] += 1
+        else:
+            categories[category] = 1
+
+    return {"message": "Get all-time statistics successfully",
+            "data": {
+                "all": len(articles),
+                "categories": categories,
+                "sites": sites
+            }}
+
+
 @app.get("/api/news")
 async def get_all(page: int = 1, offset: int = 40):
     total = sql_session["session"].query(func.count(Article.id)).scalar()

@@ -22,6 +22,7 @@ services:
       - CELERY_ACKS_LATE=${CELERY_ACKS_LATE:-1}
       - CELERYD_PREFETCH_MULTIPLIER=${CELERYD_PREFETCH_MULTIPLIER:-1}
       - X_MAX_PRIORITY=${X_MAX_PRIORITY:-10}
+      - TZ=Asia/Bangkok
     depends_on:
       - db
         # condition: service_healthy
@@ -38,7 +39,9 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    # healthcheck:
+      - TZ=Asia/Bangkok
+      - PGTZ='UTC+7'
+      # healthcheck:
     #   test: ["CMD-SHELL", "pg_isready -U postgres"]
     #   interval: 10s
     #   timeout: 5s
@@ -63,6 +66,7 @@ services:
       - CELERY_ACKS_LATE=${CELERY_ACKS_LATE:-1}
       - CELERYD_PREFETCH_MULTIPLIER=${CELERYD_PREFETCH_MULTIPLIER:-1}
       - X_MAX_PRIORITY=${X_MAX_PRIORITY:-10}
+      - TZ=Asia/Bangkok
     depends_on:
       - rabbitmq
       - db
@@ -109,20 +113,21 @@ services:
       - DANTRI_LOGO_URL=${DANTRI_LOGO_URL}
       - THANHNIEN_LOGO_URL=${THANHNIEN_LOGO_URL}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - TZ=Asia/Bangkok
     depends_on:
       - db
     networks:
       - app-tier
 
-  flower:
-    image: mher/flower
-    environment:
-      - CELERY_BROKER_URL=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASSWORD:-password}@rabbitmq:5672//
-      - FLOWER_PORT=5555
-    ports:
-      - 5555:5555
-    networks:
-      - app-tier
+  # flower:
+  #   image: mher/flower
+  #   environment:
+  #     - CELERY_BROKER_URL=amqp://${RABBITMQ_USER:-user}:${RABBITMQ_PASSWORD:-password}@rabbitmq:5672//
+  #     - FLOWER_PORT=5555
+  #   ports:
+  #     - 5555:5555
+  #   networks:
+  #     - app-tier
 
   pgadmin:
     image: dpage/pgadmin4
@@ -132,6 +137,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
+      TZ: 'Asia/Bangkok'
     depends_on:
       - db
     networks:
