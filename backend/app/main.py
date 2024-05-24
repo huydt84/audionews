@@ -177,7 +177,7 @@ async def statistic(hour: int = 1, current_user: User = Depends(get_current_user
         else:
             categories[category] = 1
 
-    return {"message": "Get all-time statistics successfully",
+    return {"message": f"Get statistics within {hour} hour(s) successfully",
             "data": {
                 "all": len(articles),
                 "categories": categories,
