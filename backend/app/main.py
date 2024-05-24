@@ -31,6 +31,15 @@ def get_site_logo(link_source):
         logo_url = ""
 
     return site_name, logo_url
+
+def get_pagination(items, page_number=1, page_size=50):
+    start_idx = (page_number - 1) * page_size
+    if start_idx >= len(items):
+        start_idx = 0
+    end_idx = start_idx + page_size
+    if end_idx > len(items):
+        end_idx = len(items)
+    return items[start_idx:end_idx]
     
 
 sql_session = {}
@@ -50,7 +59,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 @app.get("/api/news")
-async def get_all():
+async def get_all(page: int = 1, offset: int = 40):
     articles = sql_session["session"].query(Article.id, Article.title, Article.link_source, Article.image_url, Article.description, Article.slug_url, Article.written_at) \
                                     .order_by(Article.id.desc()).all()
 
@@ -63,10 +72,17 @@ async def get_all():
                      "site_name": site_name, "logo_url": logo_url,
                      "written_at": written_at.strftime("%m/%d/%Y, %H:%M:%S")})
 
-    return {"message": news}
+    return {"message": "Get all news successfully",
+            "data": get_pagination(news),
+            "pagination": {
+                "totalPages": (len(news) - 1) // offset + 1,
+                "currentPage": 1,
+                "total": len(news)
+            }}
+
 
 @app.get("/api/news/category/{category}")
-async def get_all_category(category: str):
+async def get_all_category(category: str, page: int = 1, offset: int = 40):
     articles = sql_session["session"].query(Article.id, Article.title, Article.link_source, Article.image_url, Article.description, Article.slug_url, Article.written_at) \
                                     .filter(Article.category == category).order_by(Article.id.desc()).all()
 
@@ -79,7 +95,13 @@ async def get_all_category(category: str):
                      "site_name": site_name, "logo_url": logo_url,
                      "written_at": written_at.strftime("%m/%d/%Y, %H:%M:%S")})
 
-    return {"message": news}
+    return {"message": f"Get all {category} news successfully",
+            "data": get_pagination(news),
+            "pagination": {
+                "totalPages": (len(news) - 1) // offset + 1,
+                "currentPage": 1,
+                "total": len(news)
+            }}
 
 @app.get("/api/news/{slug_url}")
 async def get_one(slug_url: str):
@@ -96,12 +118,7 @@ async def get_one(slug_url: str):
                      "audio_male-south": f"/api/news/audio/{id}/male-south",
                      "audio_female-south": f"/api/news/audio/{id}/female-south",
                      "audio_female-central": f"/api/news/audio/{id}/female-central",
-                     "written_at": written_at.strftime("%m/%d/%Y, %H:%M:%S"),
-                     "pagination": [
-                         {
-                             "total": len(articles)
-                         }
-                     ]})
+                     "written_at": written_at.strftime("%m/%d/%Y, %H:%M:%S")})
 
     return {"message": news}
 
