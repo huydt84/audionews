@@ -180,13 +180,14 @@ async def get_all_category(category: str, page: int = 1, offset: int = 40):
 
 @app.get("/api/news/{slug_url}")
 async def get_one(slug_url: str):
-    articles = sql_session["session"].query(Article.id, Article.title, Article.link_source, Article.content, Article.slug_url, Article.written_at) \
+    articles = sql_session["session"].query(Article.id, Article.title, Article.link_source, Article.image_url, Article.description, Article.content, Article.slug_url, Article.written_at) \
                                     .filter(Article.slug_url == slug_url).order_by(Article.id.desc()).all()
 
     news = []
-    for id, title, link_source, content, slug, written_at in articles:
+    for id, title, link_source, image_url, description, content, slug, written_at in articles:
         site_name, logo_url = get_site_logo(link_source)
-        news.append({"id": id, "title": title, "link_source": link_source, "content": content, 
+        news.append({"id": id, "title": title, "link_source": link_source, 
+                     "image_url": image_url, "description": description, "content": content, 
                      "slug_url": slug, "site_name": site_name, "logo_url": logo_url,
                      "audio_male-north": f"/api/news/audio/{id}/male-north",
                      "audio_female-north": f"/api/news/audio/{id}/female-north",
