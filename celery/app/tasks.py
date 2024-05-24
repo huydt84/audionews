@@ -26,8 +26,9 @@ Session = sessionmaker()
 Session.configure(bind=engine)
 session = Session()
 
-
 tts_api = "http://tts_service:3000/tts"
+
+requests.adapters.DEFAULT_RETRIES = 5
 
 @celery.task(name=config["CELERY_TASK"], queue='tasks', bind=True)
 def tts(self, title, url, category, published, content, image_url, description):
@@ -52,26 +53,7 @@ def tts(self, title, url, category, published, content, image_url, description):
     session.commit()
 
     # Get audio
-    response = requests.post(url=tts_api, json={"content": content, "folder_name": folder_name})
-    while response.status_code != 200:
-        response = requests.post(url=tts_api, json={"content": content, "folder_name": folder_name})
-    # print(len(response.content))
-    # if response.status_code == 200:
-    #     with open(f"audio/{folder_name}/male-north.wav", "wb") as f:
-    #         f.write(response.content)
+    response = requests.post(url=tts_api, json={"content": content, "folder_name": folder_name}, timeout=120)
 
-    # response = requests.post(url=f"{tts_api}/female-north", json={"content": content}, timeout=20)
-    # if response.status_code == 200:
-    #     with open(f"audio/{folder_name}/female-north.wav", "wb") as f:
-    #         f.write(response.content)
-
-    # response = requests.post(url=f"{tts_api}/male-south", json={"content": content}, timeout=20)
-    # if response.status_code == 200:
-    #     with open(f"audio/{folder_name}/male-south.wav", "wb") as f:
-    #         f.write(response.content)
-
-    # response = requests.post(url=f"{tts_api}/female-south", json={"content": content}, timeout=20)
-    # if response.status_code == 200:
-    #     with open(f"audio/{folder_name}/female-south.wav", "wb") as f:
-    #         f.write(response.content)
+    return response.json()
 

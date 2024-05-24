@@ -15,7 +15,7 @@ async def read_root():
 
 @app.post("/tts")
 async def tts(article: Article):
-    os.mkdir(f"audio/{article.folder_name}")
+    os.makedirs(f"audio/{article.folder_name}", exist_ok=True)
 
     with open("WAV_2mb.wav", "rb") as f:
         audio = f.read()
