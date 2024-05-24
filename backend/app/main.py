@@ -184,6 +184,16 @@ async def statistic(hour: int = 1, current_user: User = Depends(get_current_user
                 "sites": sites
             }}
 
+@app.delete("/api/news/{id}")
+async def delete_news(id: int, current_user: User = Depends(get_current_user)):
+    article = sql_session["session"].query(Article).filter(Article.id == id).first()
+    if article:
+        sql_session["session"].delete(article)
+        sql_session["session"].commit()
+        return {"message": "Article deleted successfully"}
+    else:
+        return {"message": "Article not found"}
+
 
 @app.get("/api/news")
 async def get_all(page: int = 1, offset: int = 40):
