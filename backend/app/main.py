@@ -1,17 +1,31 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, status, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 
+from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordRequestForm
+
 import os
-from typing import Literal
+from typing import Literal, Union
+from datetime import datetime, timedelta, timezone
+from typing_extensions import Annotated
+import jwt
+from jwt.exceptions import InvalidTokenError
 
 import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from config import config
-from models import Article
+from models import Article, Admin
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class User(BaseModel):
+    username: str
 
 def get_site_logo(link_source):
     if "https://vnexpress.net" in link_source:
@@ -56,7 +70,68 @@ async def lifespan(app: FastAPI):
     yield
     sql_session.clear()
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
 app = FastAPI(lifespan=lifespan)
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    timeout_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Credentials expired",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, os.environ.get("JWT_SECRET_KEY"), algorithms=["HS256"])
+
+        username: str = payload.get("username")
+        if username is None:
+            raise credentials_exception
+        
+        exp = payload.get("exp")
+        if exp is None: 
+            raise credentials_exception
+        if datetime.fromtimestamp(exp) < datetime.now():
+            raise timeout_exception
+
+    except InvalidTokenError:
+        raise credentials_exception
+    except Exception as e:
+        print(e)
+    user: Admin = sql_session["session"].query(Admin).filter(Admin.username == username).one()
+    if user is None:
+        raise credentials_exception
+    return User(username=user.username)
+
+
+@app.post('/login')
+async def login(payload: OAuth2PasswordRequestForm = Depends()):
+    try:
+        user: Admin = sql_session["session"].query(Admin).filter(Admin.username == payload.username).one()
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid user credentials"
+        )
+
+    is_validated: bool = user.validate_password(payload.password)
+    if not is_validated:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid password"
+        )
+
+    return Token(access_token=user.create_access_token(), token_type="bearer")
+
+
+@app.get("/me", response_model=User)
+async def read_users_me(current_user: User = Depends(get_current_user)):
+    return current_user
+
 
 @app.get("/api/news")
 async def get_all(page: int = 1, offset: int = 40):
