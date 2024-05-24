@@ -137,11 +137,11 @@ services:
     networks:
       - app-tier
 
-  web:
-    build: ./web
-    ports:
-      - '3500:3000'
-    depends_on:
-      - backend
-    networks:
-      - app-tier
+  # web:
+  #   build: ./web
+  #   ports:
+  #     - '3500:3000'
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - app-tier

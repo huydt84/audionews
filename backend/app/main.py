@@ -14,7 +14,7 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 
 import sqlalchemy
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker
 
 from config import config
@@ -135,8 +135,10 @@ async def read_users_me(current_user: User = Depends(get_current_user)):
 
 @app.get("/api/news")
 async def get_all(page: int = 1, offset: int = 40):
+    total = sql_session["session"].query(func.count(Article.id)).scalar()
+    start_idx = (page - 1) * offset
     articles = sql_session["session"].query(Article.id, Article.title, Article.link_source, Article.image_url, Article.description, Article.slug_url, Article.written_at) \
-                                    .order_by(Article.id.desc()).all()
+                                    .order_by(Article.id.desc()).limit(offset).offset(start_idx).all()
 
     news = []
     for id, title, link_source, image_url, description, slug_url, written_at in articles:
@@ -148,18 +150,20 @@ async def get_all(page: int = 1, offset: int = 40):
                      "written_at": written_at.strftime("%m/%d/%Y, %H:%M:%S")})
 
     return {"message": "Get all news successfully",
-            "data": get_pagination(news),
+            "data": news,
             "pagination": {
-                "totalPages": (len(news) - 1) // offset + 1,
+                "totalPages": (total - 1) // offset + 1,
                 "currentPage": 1,
-                "total": len(news)
+                "total": total
             }}
 
 
 @app.get("/api/news/category/{category}")
 async def get_all_category(category: str, page: int = 1, offset: int = 40):
+    total = sql_session["session"].query(func.count(Article.id)).filter(Article.category == category).scalar()
+    start_idx = (page - 1) * offset
     articles = sql_session["session"].query(Article.id, Article.title, Article.link_source, Article.image_url, Article.description, Article.slug_url, Article.written_at) \
-                                    .filter(Article.category == category).order_by(Article.id.desc()).all()
+                                    .filter(Article.category == category).order_by(Article.id.desc()).limit(offset).offset(start_idx).all()
 
     news = []
     for id, title, link_source, image_url, description, slug_url, written_at in articles:
@@ -171,11 +175,11 @@ async def get_all_category(category: str, page: int = 1, offset: int = 40):
                      "written_at": written_at.strftime("%m/%d/%Y, %H:%M:%S")})
 
     return {"message": f"Get all {category} news successfully",
-            "data": get_pagination(news),
+            "data": news,
             "pagination": {
-                "totalPages": (len(news) - 1) // offset + 1,
+                "totalPages": (total - 1) // offset + 1,
                 "currentPage": 1,
-                "total": len(news)
+                "total": total
             }}
 
 @app.get("/api/news/{slug_url}")
