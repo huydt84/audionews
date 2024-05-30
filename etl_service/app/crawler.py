@@ -6,20 +6,23 @@ import requests
 import feedparser
 from bs4 import BeautifulSoup
 import ftfy
+import uuid
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 from worker import celery
 from config import config
+from models import Article
+from utils import slug
 
+engine = create_engine((f'postgresql+psycopg2://{config["POSTGRES_USER"]}:'
+            f'{config["POSTGRES_PASSWORD"]}@{config["POSTGRES_HOST"]}:'
+            f'{config["POSTGRES_PORT"]}/{config["POSTGRES_DB"]}'))
 
-class Article:
-    def __init__(self, title, url, published, category, image_url, description):
-        self.title = title
-        self.url = url
-        self.category = category
-        self.published = published
-        self.content = ""
-        self.image_url = image_url
-        self.description = description
+Session = sessionmaker()
+Session.configure(bind=engine)
+session = Session()
 
 
 def process_rss(rss_site: str, category: str, fix_text: bool = False):
@@ -52,7 +55,15 @@ def process_rss(rss_site: str, category: str, fix_text: bool = False):
             title = ftfy.fix_text(title)
             description = ftfy.fix_text(description)
 
-        article = Article(title, url, time_published, category, img_url, description)
+        article = Article(title=title, 
+                          link_source=url, 
+                          written_at=time_published,
+                          content="", 
+                          category=category, 
+                          image_url=img_url, 
+                          description=description,
+                          slug_url=slug(title),
+                          path_audio=str(uuid.uuid4()))
         list_article.append(article)
 
     return list_article
@@ -74,15 +85,18 @@ def etl_vnexpress():
     print(len(list_article))
 
     for article in list_article:
-        page = requests.get(article.url)
+        page = requests.get(article.link_source)
         soup = BeautifulSoup(page.text, "html.parser")
 
         for paragraph in soup.find_all('p'):
             article.content += paragraph.get_text()
-            article.content += "\n"
+            article.content += "\n\n"
+
+        session.add(article)
+        session.commit()
 
         celery.send_task(config["CELERY_TASK"], 
-                        args=[article.title, article.url, article.category, article.published, article.content, article.image_url, article.description],
+                        args=[article.path_audio, article.content],
                         queue="tasks")
 
     return list_article
@@ -103,15 +117,18 @@ def etl_dantri():
     print(len(list_article))
 
     for article in list_article:
-        page = requests.get(article.url)
+        page = requests.get(article.link_source)
         soup = BeautifulSoup(page.text, "html.parser")
 
         for paragraph in soup.find_all('p'):
             article.content += paragraph.get_text()
-            article.content += "\n"
+            article.content += "\n\n"
+
+        session.add(article)
+        session.commit()
 
         celery.send_task(config["CELERY_TASK"], 
-                        args=[article.title, article.url, article.category, article.published, article.content, article.image_url, article.description],
+                        args=[article.path_audio, article.content],
                         queue="tasks")
 
     return list_article
@@ -132,15 +149,18 @@ def etl_vtcnews():
     print(len(list_article))
 
     for article in list_article:
-        page = requests.get(article.url)
+        page = requests.get(article.link_source)
         soup = BeautifulSoup(page.text, "html.parser")
 
         for paragraph in soup.find_all('p'):
             article.content += paragraph.get_text()
-            article.content += "\n"
+            article.content += "\n\n"
+
+        session.add(article)
+        session.commit()
 
         celery.send_task(config["CELERY_TASK"], 
-                        args=[article.title, article.url, article.category, article.published, article.content, article.image_url, article.description],
+                        args=[article.path_audio, article.content],
                         queue="tasks")
 
     return list_article
@@ -161,17 +181,20 @@ def etl_thanhnien():
     print(len(list_article))
 
     for article in list_article:
-        page = requests.get(article.url)
+        page = requests.get(article.link_source)
         soup = BeautifulSoup(page.text, "html.parser")
 
         for paragraph in soup.find_all('p'):
             # TODO: find a way to exclude footer text
 
             article.content += paragraph.get_text()
-            article.content += "\n"
+            article.content += "\n\n"
+
+        session.add(article)
+        session.commit()
 
         celery.send_task(config["CELERY_TASK"], 
-                        args=[article.title, article.url, article.category, article.published, article.content, article.image_url, article.description],
+                        args=[article.path_audio, article.content],
                         queue="tasks")
 
     return list_article
@@ -192,17 +215,20 @@ def etl_tienphong():
     print(len(list_article))
 
     for article in list_article:
-        page = requests.get(article.url)
+        page = requests.get(article.link_source)
         soup = BeautifulSoup(page.text, "html.parser")
 
         for paragraph in soup.find_all('p'):
             # TODO: find a way to exclude footer text and class story__cate
 
             article.content += paragraph.get_text()
-            article.content += "\n"
+            article.content += "\n\n"
+
+        session.add(article)
+        session.commit()
 
         celery.send_task(config["CELERY_TASK"], 
-                        args=[article.title, article.url, article.category, article.published, article.content, article.image_url, article.description],
+                        args=[article.path_audio, article.content],
                         queue="tasks")
 
     return list_article

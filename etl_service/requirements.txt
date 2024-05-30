@@ -5,3 +5,7 @@ bs4
 requests
 python-dateutil
 ftfy
+shortuuid
+sqlalchemy
+sqlalchemy-utils
+psycopg2-binary

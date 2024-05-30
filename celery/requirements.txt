@@ -1,10 +1,2 @@
-psycopg2-binary
 celery==4.4.7
-beautifulsoup4
-feedparser
 requests
-sqlalchemy
-sqlalchemy-utils
-python-dateutil
-pytz
-shortuuid

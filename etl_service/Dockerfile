@@ -10,4 +10,8 @@ COPY ./app /app/
 
 WORKDIR /app
 
-CMD ["python", "crawler.py"]
+ADD docker_entrypoint.sh /docker_entrypoint.sh
+
+RUN chmod +x /docker_entrypoint.sh
+
+CMD ["/docker_entrypoint.sh"]
