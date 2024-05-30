@@ -57,6 +57,16 @@ def get_pagination(items, page_number=1, page_size=50):
     if end_idx > len(items):
         end_idx = len(items)
     return items[start_idx:end_idx]
+
+
+def get_existed_api_audio(folder_path: str, id: int, voice: Literal["male-north", "female-north", "male-south", "female-south", "female-central"]):
+    file_name = voice + ".wav"
+    audio_path = os.path.join("audio", folder_path, file_name)
+
+    # Check if audio file was created
+    if os.path.exists(audio_path):
+        return f"/api/news/audio/{id}/{voice}"
+    return None
     
 
 sql_session = {}
@@ -249,20 +259,22 @@ async def get_all_category(category: str, page: int = 1, offset: int = 40):
 
 @app.get("/api/news/{slug_url}")
 async def get_one(slug_url: str):
-    articles = sql_session["session"].query(Article.id, Article.title, Article.link_source, Article.image_url, Article.description, Article.content, Article.slug_url, Article.written_at) \
+    articles = sql_session["session"].query(Article.id, Article.title, Article.link_source, Article.image_url, Article.description, Article.content, Article.slug_url, Article.written_at, Article.path_audio) \
                                     .filter(Article.slug_url == slug_url).order_by(Article.id.desc()).all()
 
     news = []
-    for id, title, link_source, image_url, description, content, slug, written_at in articles:
+    for id, title, link_source, image_url, description, content, slug, written_at, path_audio in articles:
         site_name, logo_url = get_site_logo(link_source)
+
+
         news.append({"id": id, "title": title, "link_source": link_source, 
                      "image_url": image_url, "description": description, "content": content, 
                      "slug_url": slug, "site_name": site_name, "logo_url": logo_url,
-                     "audio_male-north": f"/api/news/audio/{id}/male-north",
-                     "audio_female-north": f"/api/news/audio/{id}/female-north",
-                     "audio_male-south": f"/api/news/audio/{id}/male-south",
-                     "audio_female-south": f"/api/news/audio/{id}/female-south",
-                     "audio_female-central": f"/api/news/audio/{id}/female-central",
+                     "audio_male-north": get_existed_api_audio(path_audio, id, "male-north"),
+                     "audio_female-north": get_existed_api_audio(path_audio, id, "female-north"),
+                     "audio_male-south": get_existed_api_audio(path_audio, id, "male-south"),
+                     "audio_female-south": get_existed_api_audio(path_audio, id, "female-south"),
+                     "audio_female-central": get_existed_api_audio(path_audio, id, "female-central"),
                      "written_at": written_at.strftime("%m/%d/%Y, %H:%M:%S")})
 
     return {"message": news}
