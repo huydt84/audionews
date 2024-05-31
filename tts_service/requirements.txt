@@ -2,3 +2,10 @@ fastapi
 uvicorn
 pydantic
 python-multipart
+scipy
+numpy
+piper-phonemize
+wavfile
+onnxruntime
+pydub
+underthesea

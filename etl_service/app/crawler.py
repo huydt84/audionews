@@ -236,7 +236,7 @@ def etl_tienphong():
 def crawl():
     print("Start Crawling!!!")
     etl_vnexpress()
-    etl_thanhnien()
+    # etl_thanhnien()
     # etl_dantri()
     # etl_tienphong()
     # etl_vtcnews()
