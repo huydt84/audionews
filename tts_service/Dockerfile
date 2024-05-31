@@ -1,6 +1,10 @@
-FROM python:3.7.7-slim
+FROM python:3.10-slim
 
 ENV LANG="C.UTF-8"
+
+RUN set -x \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends ffmpeg
 
 COPY ./requirements.txt /tmp/requirements.txt
 
