@@ -228,7 +228,7 @@ async def get_all(page: int = 1, offset: int = 40):
             "data": news,
             "pagination": {
                 "totalPages": (total - 1) // offset + 1,
-                "currentPage": 1,
+                "currentPage": page,
                 "total": total
             }}
 
@@ -253,7 +253,7 @@ async def get_all_category(category: str, page: int = 1, offset: int = 40):
             "data": news,
             "pagination": {
                 "totalPages": (total - 1) // offset + 1,
-                "currentPage": 1,
+                "currentPage": page,
                 "total": total
             }}
 
