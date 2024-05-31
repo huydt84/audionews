@@ -396,7 +396,6 @@ def collapse_whitespace(text):
 
 def cleaner(text):
     '''pipeline for vietnamese text, including number and abbreviation expansion.'''
-    text = text.lower()
     text = normalize_numbers(text)
     text = expand_abbreviations_vi(text)
     text = collapse_whitespace(text)
