@@ -7,7 +7,7 @@ from worker import celery
 # Tạo logger
 logger = logging.getLogger(__name__)
 
-tts_api = "http://tts_service:3000/tts-real"
+tts_api = "http://tts_service:3000/tts"
 
 requests.adapters.DEFAULT_RETRIES = 5
 

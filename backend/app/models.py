@@ -67,3 +67,11 @@ class Admin(Base):
         to_encode = {"username": self.username, "exp": expire}
         encoded_jwt = jwt.encode(to_encode, os.environ.get("JWT_SECRET_KEY"))
         return encoded_jwt
+    
+    def change_password(self, session, old_password, new_password):
+        if self.password != old_password:
+            return False
+        
+        self.password = new_password
+        session.commit()
+        return True

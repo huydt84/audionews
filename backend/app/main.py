@@ -30,6 +30,10 @@ class Token(BaseModel):
 class User(BaseModel):
     username: str
 
+class PasswordChanger(BaseModel):
+    old_password: str
+    new_password: str
+
 def get_site_logo(link_source):
     if "https://vnexpress.net" in link_source:
         site_name = "VnExpress"
@@ -144,6 +148,20 @@ async def login(payload: OAuth2PasswordRequestForm = Depends()):
 @app.get("/me", response_model=User)
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+@app.post("/change-password")
+async def change_password(pc: PasswordChanger, current_user: User = Depends(get_current_user)):
+    user: Admin = sql_session["session"].query(Admin).filter(Admin.username == current_user.username).one()
+    success = user.change_password(
+        session=sql_session["session"],
+        old_password=pc.old_password,
+        new_password=pc.new_password
+    )
+
+    if success:
+        return {"success": True, "message": "Change password successfully!"}
+    else:
+        return {"success": False, "message": "Failed! Old password is incorrect!"}
 
 
 @app.get("/api/statistic")
