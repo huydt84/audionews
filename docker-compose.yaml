@@ -24,8 +24,8 @@ services:
       - X_MAX_PRIORITY=${X_MAX_PRIORITY:-10}
       - TZ=Asia/Bangkok
     depends_on:
-      - db
-        # condition: service_healthy
+      rabbitmq:
+          condition: service_healthy
     networks:
       - app-tier
 
@@ -87,10 +87,17 @@ services:
       - 15672:15672
     networks:
       - app-tier
+    depends_on:
+      - db
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   tts_service:
     build: ./tts_service
-    command: ['uvicorn', 'main:app', '--host', '0.0.0.0', '--port', '3000', '--reload']
+    command: ['uvicorn', 'main:app', '--host', '0.0.0.0', '--port', '3000']
     ports:
       - '8080:3000'
     volumes:
@@ -102,7 +109,7 @@ services:
 
   backend:
     build: ./backend
-    command: ['uvicorn', 'main:app', '--host', '0.0.0.0', '--port', '3000', '--reload']
+    command: ['uvicorn', 'main:app', '--host', '0.0.0.0', '--port', '3000']
     ports:
       - '5678:3000'
     volumes:
