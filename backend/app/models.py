@@ -63,7 +63,7 @@ class Admin(Base):
         if expires_delta:
             expire = datetime.now(timezone.utc) + expires_delta
         else:
-            expire = datetime.now(timezone.utc) + timedelta(minutes=60)
+            expire = datetime.now(timezone.utc) + timedelta(days=7)
         to_encode = {"username": self.username, "exp": expire}
         encoded_jwt = jwt.encode(to_encode, os.environ.get("JWT_SECRET_KEY"))
         return encoded_jwt
