@@ -76,22 +76,27 @@ export default async function NewsDetailPage({ params }: Props) {
 
         <div className="space-y-2">
           <AudioItem
-            title="Giọng nam-bắc:"
-            url={`${process.env.NEXT_PUBLIC_AUDIO_SRC}${news['audio_female-central']}`}
+            title="Giọng nam miền Bắc:"
+            url={`${process.env.NEXT_PUBLIC_AUDIO_SRC}${news['audio_male-north']}`}
           />
 
           <AudioItem
-            title="Giọng nữ-bắc:"
-            url={`${process.env.NEXT_PUBLIC_AUDIO_SRC}${news['audio_female-central']}`}
+            title="Giọng nữ miền Bắc:"
+            url={`${process.env.NEXT_PUBLIC_AUDIO_SRC}${news['audio_female-north']}`}
           />
 
           <AudioItem
-            title="Giọng nam-nam:"
-            url={`${process.env.NEXT_PUBLIC_AUDIO_SRC}${news['audio_female-central']}`}
+            title="Giọng nam miền Nam:"
+            url={`${process.env.NEXT_PUBLIC_AUDIO_SRC}${news['audio_male-south']}`}
           />
 
           <AudioItem
-            title="Giọng nữ-name:"
+            title="Giọng nữ miền Nam:"
+            url={`${process.env.NEXT_PUBLIC_AUDIO_SRC}${news['audio_female-south']}`}
+          />
+
+          <AudioItem
+            title="Giọng nữ miền Trung:"
             url={`${process.env.NEXT_PUBLIC_AUDIO_SRC}${news['audio_female-central']}`}
           />
         </div>

@@ -27,7 +27,7 @@ export default function StatisticCard({ label, data }: Props) {
         <div>
           <p className="mb-1.5">Thể loại</p>
 
-          <StatisticItem label="Tin nhanh: " value={data.categories?.news} />
+          <StatisticItem label="Thời sự: " value={data.categories?.news} />
           <StatisticItem label="Thể thao: " value={data.categories?.sport} />
           <StatisticItem label="Thế giới: " value={data.categories?.world} />
           <StatisticItem label="Giáo dục: " value={data.categories?.education} />
