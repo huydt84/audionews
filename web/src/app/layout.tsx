@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import Navbar from '@/components/navbar'
 import { cn } from '@/lib/utils'
 import Providers from '@/components/provider'
+import { Toaster } from '@/components/ui/toaster'
+import Navbar from '@/components/navbar'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,13 +21,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={cn('w-screen h-full relative overflow-x-hidden bg-[#edf2f7]', inter.className)}
+        className={cn('w-screen h-screen relative overflow-x-hidden bg-[#edf2f7]', inter.className)}
       >
         <Navbar />
 
-        <div className="p-12 max-w-[1800px] mx-auto">
+        <div className="min-h-content">
           <Providers>{children}</Providers>
         </div>
+
+        <Toaster />
       </body>
     </html>
   )
