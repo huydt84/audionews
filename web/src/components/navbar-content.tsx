@@ -32,7 +32,7 @@ function NavLink({ title, url }: NavLinkProps) {
 function UserNavbar() {
   return (
     <div className="flex justify-center items-center space-x-6 ml-8">
-      <NavLink title="Tin mới nhất" url="/news" />
+      <NavLink title="Thời sự" url="/news" />
 
       <NavLink title="Thể thao" url="/sport" />
 
@@ -71,6 +71,9 @@ function AdminNavbar({ username }: AdminNavbarProps) {
       <p>
         Đăng nhập dưới tên: <span className="font-medium">{username}</span>
       </p>
+
+      <NavLink title="Đổi mật khẩu" url="/admin/change-password" />
+
       <Button
         variant="link"
         onClick={onLogout}
@@ -92,9 +95,11 @@ export default function NavbarContent({ user }: Props) {
 
   const isAdminPage = pathname.startsWith('/admin')
 
+  const link = isAdminPage ? '/admin' : '/'
+
   return (
     <nav className="px-6 py-4 bg-white sticky w-full z-20 top-0 start-0 border-b border-gray-200 flex gap-4 items-center">
-      <Link href="/" className="text-2xl font-semibold">
+      <Link href={link} className="text-2xl font-semibold">
         AudioNews
       </Link>
 

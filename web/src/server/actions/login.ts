@@ -2,6 +2,8 @@
 import axiosClient from '@/lib/axios-client'
 import { LoginResponse } from '@/@types/auth'
 import { cookies } from 'next/headers'
+import * as z from 'zod'
+import { ChangePasswordSchema } from '@/schema/login'
 
 export const login = async (data: FormData) => {
   try {
@@ -38,6 +40,36 @@ export const getCurrentUser = async () => {
     })
 
     return response
+  } catch (error) {
+    return null
+  }
+}
+
+export const changePassword = async (data: z.infer<typeof ChangePasswordSchema>) => {
+  try {
+    const token = cookies().get('token')
+
+    const { data: response } = await axiosClient.post<{ success: boolean; message: string }>(
+      '/change-password',
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token?.value}`
+        }
+      }
+    )
+
+    console.log(response.success)
+
+    if (response.success) {
+      console.log('logout')
+
+      cookies().set('token', '', {
+        expires: new Date(0)
+      })
+    }
+
+    return response.success
   } catch (error) {
     return null
   }

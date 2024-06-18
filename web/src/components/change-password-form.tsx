@@ -15,61 +15,58 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useTransition } from 'react'
 import { CardWrapper } from './card-wrapper'
-import { LoginSchema } from '@/schema/login'
-import { login } from '@/server/actions/login'
+import { ChangePasswordSchema } from '@/schema/login'
+import { changePassword, login } from '@/server/actions/login'
 import { useToast } from './ui/use-toast'
 import { useRouter } from 'next/navigation'
 
-export const LoginForm = () => {
+export const ChangePasswordForm = () => {
   const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
   const router = useRouter()
 
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<z.infer<typeof ChangePasswordSchema>>({
+    resolver: zodResolver(ChangePasswordSchema),
     defaultValues: {
-      username: '',
-      password: ''
+      old_password: '',
+      new_password: '',
+      confirm_password: ''
     }
   })
 
-  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = (values: z.infer<typeof ChangePasswordSchema>) => {
     startTransition(() => {
-      const formData = new FormData()
-      formData.append('username', values.username)
-      formData.append('password', values.password)
-
-      login(formData).then(data => {
-        if ((data as any).error) {
+      changePassword(values).then(data => {
+        if (!data) {
           toast({
-            title: 'Login failed',
-            description: 'Invalid username or password'
+            title: 'Change password failed',
+            description: 'Change password failed please try again later'
           })
           return
         }
 
         toast({
-          title: 'Login successfully',
-          description: 'You are now logged in'
+          title: 'Change password success',
+          description: 'Change password success please login again to continue'
         })
-        router.push('/admin')
+        router.push('/admin/login')
       })
     })
   }
 
   return (
-    <CardWrapper headerLabel="Admin Login">
+    <CardWrapper headerLabel="Change password">
       <Form {...form}>
         <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           <div className="space-y-4">
             <FormField
               control={form.control}
-              name="username"
+              name="old_password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel>Old password</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={isPending} type="id" />
+                    <Input {...field} disabled={isPending} placeholder="******" type="password" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -78,10 +75,24 @@ export const LoginForm = () => {
 
             <FormField
               control={form.control}
-              name="password"
+              name="new_password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>New password</FormLabel>
+                  <FormControl>
+                    <Input {...field} disabled={isPending} placeholder="******" type="password" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="confirm_password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm password</FormLabel>
                   <FormControl>
                     <Input {...field} disabled={isPending} placeholder="******" type="password" />
                   </FormControl>

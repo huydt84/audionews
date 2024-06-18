@@ -5,7 +5,7 @@ export const middleware = async (req: NextRequest) => {
   const { nextUrl } = req
   const token = cookies().get('token')?.value
 
-  const isAdminPage = nextUrl.pathname === '/admin'
+  const isAdminPage = nextUrl.pathname === '/admin' || nextUrl.pathname === '/admin/change-password'
   const isLoginPage = nextUrl.pathname === '/admin/login'
 
   if (isAdminPage && !token) {
