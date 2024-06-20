@@ -3,6 +3,7 @@ import { formatTime } from '@/lib/data-time'
 import { getNewsBySlug } from '@/server/actions/news'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Fragment } from 'react'
 import { FaArrowLeft, FaExternalLinkAlt } from 'react-icons/fa'
 
 type Props = {
@@ -30,7 +31,7 @@ export default async function NewsDetailPage({ params }: Props) {
 
   return (
     <main className="flex justify-center items-start relative">
-      <div className="grow sticky top-[7.063rem]">
+      <div className="min-w-[20rem] sticky top-[7.063rem]">
         <Link
           href="/"
           className="flex justify-center items-center w-min whitespace-nowrap font-medium gap-2 group hover:underline transition-all duration-200"
@@ -39,7 +40,7 @@ export default async function NewsDetailPage({ params }: Props) {
           <span>Trở về</span>
         </Link>
       </div>
-      <div className="max-w-[800px] mx-auto space-y-6">
+      <div className="grow col-span-2 mx-auto space-y-6">
         <Image
           src={news.image_url}
           width={1920}
@@ -105,9 +106,19 @@ export default async function NewsDetailPage({ params }: Props) {
           <p className="font-medium text-lg opacity-60">News content empty.</p>
         )}
 
-        <p>{news.content}</p>
+        <div>
+          {news.content
+            .split('\n')
+            .filter(each => each.trim() !== '')
+            .map((each, index) => (
+              <Fragment key={index}>
+                <p>{each}</p>
+                <br />
+              </Fragment>
+            ))}
+        </div>
       </div>
-      <div className="grow"></div>
+      <div className="min-w-[20rem]"></div>
     </main>
   )
 }

@@ -4,6 +4,7 @@ import { IApiResponse } from '@/@types'
 import { IStatisticData } from '@/@types/news'
 import axiosClient from '@/lib/axios-client'
 import { cookies } from 'next/headers'
+import { logout } from './login'
 
 export const getAllTimeStatistic = async () => {
   try {
@@ -36,6 +37,11 @@ export const getLatestStatistic = async () => {
         }
       }
     )
+
+    if (!response.data) {
+      await logout()
+      return null
+    }
 
     return response.data
   } catch (error) {

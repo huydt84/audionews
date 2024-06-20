@@ -1,9 +1,9 @@
-import NewsPagination from '@/components/news-pagination'
 import { NewsTable } from '@/components/news-table'
 import StatisticCard from '@/components/statistic-card'
 
 import { getCurrentUser } from '@/server/actions/login'
 import { getAllTimeStatistic, getLatestStatistic } from '@/server/actions/statistic'
+import DeleteCookie from '@/components/delete-cookie'
 
 type Props = {
   searchParams?: {
@@ -17,7 +17,9 @@ export default async function AdminPage({ searchParams }: Props) {
   const latestData = await getLatestStatistic()
   const currentPage = searchParams?.page ? parseInt(searchParams.page) : 1
 
-  if (!user) return <p>Unauthorized</p>
+  if (!user || !allTimeData || !latestData) {
+    return <DeleteCookie />
+  }
 
   return (
     <div className="w-[95%] space-y-6">

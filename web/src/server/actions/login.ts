@@ -59,11 +59,7 @@ export const changePassword = async (data: z.infer<typeof ChangePasswordSchema>)
       }
     )
 
-    console.log(response.success)
-
     if (response.success) {
-      console.log('logout')
-
       cookies().set('token', '', {
         expires: new Date(0)
       })
