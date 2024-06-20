@@ -3,7 +3,7 @@ uvicorn
 pydantic
 python-multipart
 scipy
-numpy
+numpy<2
 piper-phonemize
 wavfile
 onnxruntime
