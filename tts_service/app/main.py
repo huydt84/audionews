@@ -10,12 +10,29 @@ class Article(BaseModel):
     content: str
     folder_name: str
 
-app = FastAPI()
+# app = FastAPI()
 
+# model = {}
+
+# @app.on_event("startup")
+# async def load_model():
+#     print("start")
+#     model["male-north"] = TTS("models/nam_bac/model.onnx", "models/nam_bac/config.json")
+#     model["male-south"] = TTS("models/nam_nam/model.onnx", "models/nam_nam/config.json")
+#     model["female-north"] = TTS("models/nu_bac/model.onnx", "models/nu_bac/config.json")
+#     model["female-south"] = TTS("models/nu_nam/model.onnx", "models/nu_nam/config.json")
+#     model["female-central"] = TTS("models/nu_trung/model.onnx", "models/nu_trung/config.json")
+#     print("Model setup completed!")
+
+# @app.on_event("shutdown")
+# async def clear_model():
+#     print("shutdown")
+#     model.clear()
+    
 model = {}
 
-@app.on_event("startup")
-async def load_model():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     print("start")
     model["male-north"] = TTS("models/nam_bac/model.onnx", "models/nam_bac/config.json")
     model["male-south"] = TTS("models/nam_nam/model.onnx", "models/nam_nam/config.json")
@@ -23,11 +40,11 @@ async def load_model():
     model["female-south"] = TTS("models/nu_nam/model.onnx", "models/nu_nam/config.json")
     model["female-central"] = TTS("models/nu_trung/model.onnx", "models/nu_trung/config.json")
     print("Model setup completed!")
-
-@app.on_event("shutdown")
-async def clear_model():
+    yield
     print("shutdown")
     model.clear()
+
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 async def read_root():
