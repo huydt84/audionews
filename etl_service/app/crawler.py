@@ -86,11 +86,12 @@ def etl_vnexpress():
 
     for article in list_article:
         page = requests.get(article.link_source)
-        soup = BeautifulSoup(page.text, "html.parser")
+        soup = BeautifulSoup(page.content, "html.parser")
 
-        for paragraph in soup.find_all('p'):
-            article.content += paragraph.get_text()
-            article.content += "\n\n"
+        content_div = soup.find('div', {"class":"fck_detail"})
+        if content_div:
+            paragraphs = content_div.find_all('p')
+            article.content = '\n'.join([p.get_text() for p in paragraphs if not (p.has_attr('class') and 'Image' in p['class'])])
 
         session.add(article)
         session.commit()
@@ -118,43 +119,12 @@ def etl_dantri():
 
     for article in list_article:
         page = requests.get(article.link_source)
-        soup = BeautifulSoup(page.text, "html.parser")
+        soup = BeautifulSoup(page.content, "html.parser")
 
-        for paragraph in soup.find_all('p'):
-            article.content += paragraph.get_text()
-            article.content += "\n\n"
-
-        session.add(article)
-        session.commit()
-
-        celery.send_task(config["CELERY_TASK"], 
-                        args=[article.path_audio, article.content],
-                        queue="tasks")
-
-    return list_article
-
-def etl_vtcnews():
-    news = process_rss("https://vtcnews.vn/rss/thoi-su.rss", "news")
-    world = process_rss("https://vtcnews.vn/rss/the-gioi.rss", "world")
-    # health = process_rss("https://vtcnews.vn/rss/suc-khoe.rss", "health")
-    # economy = process_rss("https://vtcnews.vn/rss/kinh-te.rss", "economy")
-    # vehicle = process_rss("https://vtcnews.vn/rss/oto-xe-may.rss", "vehicle")
-    education = process_rss("https://vtcnews.vn/rss/giao-duc.rss", "education")
-    sport = process_rss("https://vtcnews.vn/rss/the-thao.rss", "sport")
-    # law = process_rss("https://vtcnews.vn/rss/phap-luat.rss", "law")
-    # youth = process_rss("https://vtcnews.vn/rss/gioi-tre.rss", "youth")
-
-    # list_article = news + world + health + economy + vehicle + education + sport + law + youth
-    list_article = news + world + education + sport
-    print(len(list_article))
-
-    for article in list_article:
-        page = requests.get(article.link_source)
-        soup = BeautifulSoup(page.text, "html.parser")
-
-        for paragraph in soup.find_all('p'):
-            article.content += paragraph.get_text()
-            article.content += "\n\n"
+        content_div = soup.find('div', {"class":"singular-content"})
+        if content_div:
+            paragraphs = content_div.find_all('p')
+            article.content = '\n'.join([p.get_text() for p in paragraphs if not p.find_parent('figcaption')])
 
         session.add(article)
         session.commit()
@@ -182,13 +152,12 @@ def etl_thanhnien():
 
     for article in list_article:
         page = requests.get(article.link_source)
-        soup = BeautifulSoup(page.text, "html.parser")
+        soup = BeautifulSoup(page.content, "html.parser")
 
-        for paragraph in soup.find_all('p'):
-            # TODO: find a way to exclude footer text
-
-            article.content += paragraph.get_text()
-            article.content += "\n\n"
+        content_div = soup.find('div', {"class":"detail-content afcbc-body"})
+        if content_div:
+            paragraphs = content_div.find_all('p')
+            article.content = '\n'.join([p.get_text() for p in paragraphs if not p.has_attr('data-placeholder')])
 
         session.add(article)
         session.commit()
@@ -216,13 +185,12 @@ def etl_tienphong():
 
     for article in list_article:
         page = requests.get(article.link_source)
-        soup = BeautifulSoup(page.text, "html.parser")
+        soup = BeautifulSoup(page.content, "html.parser")
 
-        for paragraph in soup.find_all('p'):
-            # TODO: find a way to exclude footer text and class story__cate
-
-            article.content += paragraph.get_text()
-            article.content += "\n\n"
+        content_div = soup.find('div', {"class":"article__body cms-body"})
+        if content_div:
+            paragraphs = content_div.find_all('p')
+            article.content = '\n'.join([p.get_text() for p in paragraphs])
 
         session.add(article)
         session.commit()
