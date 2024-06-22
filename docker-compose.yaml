@@ -157,6 +157,8 @@ services:
       - '3500:3000'
     environment:
       TZ: 'Asia/Bangkok'
+    env_file:
+      - ./web/.env.local
     depends_on:
       - backend
     networks:
