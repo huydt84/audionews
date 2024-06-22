@@ -394,6 +394,33 @@ def expand_abbreviations_vi(text):
 def collapse_whitespace(text):
     return re.sub(_whitespace_re, ' ', text)
 
+def read_file_to_tuples(file_path):
+    data_label_pairs = []
+    with open(file_path, 'r') as file:
+        for line in file:
+            # Strip any leading/trailing whitespace characters
+            line = line.strip()
+            # Split the line by the tab character
+            data, label = line.split('|')
+            # Append the tuple (data, label) to the list
+            data_label_pairs.append((data, label))
+    return data_label_pairs
+
+class NewsCleaner():
+    def __init__(self, foreign_path):
+        word_spelling_pairs = read_file_to_tuples(foreign_path)
+        self.foreign_regex_pairs = [(re.compile('\\b%s\\.' % x[0], re.IGNORECASE), x[1]) for x in word_spelling_pairs]
+
+    def cleaner(self, text):
+        '''pipeline for vietnamese text, including number and abbreviation expansion.'''
+        text = normalize_numbers(text)
+        text = expand_abbreviations_vi(text)
+        for regex, replacement in self.foreign_regex_pairs:
+            text = re.sub(regex, replacement, text)
+        text = collapse_whitespace(text)
+        text = text_normalize(text)
+        return text
+
 def cleaner(text):
     '''pipeline for vietnamese text, including number and abbreviation expansion.'''
     text = normalize_numbers(text)

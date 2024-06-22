@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 import os
 
 from models import TTS
-from cleaner import cleaner
+from cleaner import NewsCleaner
 
 class Article(BaseModel):
     content: str
@@ -39,6 +39,7 @@ async def lifespan(app: FastAPI):
     model["female-north"] = TTS("models/nu_bac/model.onnx", "models/nu_bac/config.json")
     model["female-south"] = TTS("models/nu_nam/model.onnx", "models/nu_nam/config.json")
     model["female-central"] = TTS("models/nu_trung/model.onnx", "models/nu_trung/config.json")
+    model["cleaner"] = NewsCleaner("foreign_word.txt")
     print("Model setup completed!")
     yield
     print("shutdown")
@@ -78,7 +79,10 @@ async def tts(article: Article):
 async def tts_real(article: Article):
     os.makedirs(f"audio/{article.folder_name}", exist_ok=True)
 
-    text = cleaner(article.content)
+    if len(article.content.strip()) == 0:
+        return {"message": "error: no content to generate audio!"}
+
+    text = model["cleaner"].cleaner(article.content)
 
     model["male-north"].inference(text, f"audio/{article.folder_name}/male-north.wav")
     model["male-south"].inference(text, f"audio/{article.folder_name}/male-south.wav")
