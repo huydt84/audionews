@@ -8,9 +8,9 @@ const nextConfig = {
         port: '',
         pathname: '/**'
       },
-      
     ]
-  }
+  },
+  output: 'standalone'
 }
 
 export default nextConfig

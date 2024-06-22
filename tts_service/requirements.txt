@@ -1,7 +1,6 @@
 fastapi
 uvicorn
 pydantic
-python-multipart
 scipy
 numpy<2
 piper-phonemize
