@@ -190,7 +190,7 @@ def etl_tienphong():
         content_div = soup.find('div', {"class":"article__body cms-body"})
         if content_div:
             paragraphs = content_div.find_all('p')
-            article.content = '\n'.join([p.get_text() for p in paragraphs])
+            article.content = '\n'.join([p.get_text() for p in paragraphs if not p.find_parent('td')])
 
         session.add(article)
         session.commit()

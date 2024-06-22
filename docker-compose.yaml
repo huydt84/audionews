@@ -155,6 +155,8 @@ services:
     build: ./web
     ports:
       - '3500:3000'
+    environment:
+      TZ: 'Asia/Bangkok'
     depends_on:
       - backend
     networks:
