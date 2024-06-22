@@ -88,10 +88,10 @@ def etl_vnexpress():
         page = requests.get(article.link_source)
         soup = BeautifulSoup(page.content, "html.parser")
 
-        content_div = soup.find('div', {"class":"fck_detail"})
+        content_div = soup.find('article', {"class":"fck_detail"})
         if content_div:
             paragraphs = content_div.find_all('p')
-            article.content = '\n'.join([p.get_text() for p in paragraphs if not (p.has_attr('class') and 'Image' in p['class'])])
+            article.content = '\n'.join([p.get_text() for p in paragraphs if 'Normal' in p['class']])
 
         session.add(article)
         session.commit()
