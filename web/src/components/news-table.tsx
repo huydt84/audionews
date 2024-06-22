@@ -19,6 +19,7 @@ import DeleteNewsButton from './delete-news-button'
 import { useTransition } from 'react'
 import { adminRegenerateNews } from '@/server/actions/news'
 import { useToast } from './ui/use-toast'
+import Link from 'next/link'
 
 type Props = {
   currentPage: number
@@ -58,7 +59,14 @@ export function NewsTable({ currentPage }: Props) {
           {data.data.map(news => (
             <TableRow key={news.id}>
               <TableCell className="font-medium">{news.id}</TableCell>
-              <TableCell>{news.title}</TableCell>
+              <TableCell>
+                <Link
+                  href={`/news/${news.slug_url}`}
+                  className="transition-all duration-200 hover:underline"
+                >
+                  {news.title}
+                </Link>
+              </TableCell>
               <TableCell>
                 <Image
                   src={news.logo_url}

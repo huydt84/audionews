@@ -48,11 +48,16 @@ export default function Card({ newsData }: Props) {
 
       <Link
         href={`/news/${newsData.slug_url}`}
-        className="flex absolute text-blue-700 bottom-2 left-6 hover:underline group items-center gap-0.5 text-lg font-medium mt-2"
+        className="flex absolute text-blue-700 bottom-2 left-6 hover:underline group items-center gap-0.5 text-lg font-medium mt-2 z-[3]"
       >
         Read more
         <MdArrowRightAlt className="text-2xl group-hover:translate-x-[3px] transition-transform duration-150" />
       </Link>
+
+      <Link
+        href={`/news/${newsData.slug_url}`}
+        className="w-full h-full absolute top-0 left-0 z-[2]"
+      />
     </div>
   )
 }
