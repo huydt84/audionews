@@ -4,7 +4,6 @@ pydantic
 scipy
 numpy<2
 piper-phonemize
-wavfile
 onnxruntime
 pydub
-underthesea
+joblib

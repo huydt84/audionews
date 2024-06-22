@@ -7,7 +7,7 @@ from worker import celery
 # Tạo logger
 logger = logging.getLogger(__name__)
 
-tts_api = "http://tts_service:3000/tts"
+tts_api = "http://tts_service:3000/tts-real"
 
 @celery.task(name=config["CELERY_TASK"], queue='tasks', bind=True)
 def tts(self, folder_name, content):

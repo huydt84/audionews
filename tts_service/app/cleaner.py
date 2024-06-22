@@ -1,5 +1,6 @@
 import re
-from underthesea import text_normalize
+# from underthesea import text_normalize
+import text_normalize
 
 # định nghĩa các yếu tố cấn thiết
 _UNITS = [ "mươi", "trăm", "nghìn", "mươi", "trăm", "triệu", "mươi", "trăm", "tỷ" ]
@@ -418,7 +419,7 @@ class NewsCleaner():
         for regex, replacement in self.foreign_regex_pairs:
             text = re.sub(regex, replacement, text)
         text = collapse_whitespace(text)
-        text = text_normalize(text)
+        text = text_normalize.text_normalize(text)
         return text
 
 def cleaner(text):
