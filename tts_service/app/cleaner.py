@@ -1,5 +1,5 @@
 import re
-# from underthesea import text_normalize
+import warnings
 import text_normalize
 
 # định nghĩa các yếu tố cấn thiết
@@ -161,8 +161,53 @@ def uintStr2Str(input:str, isSingle=False):
     # trả về kết quả
     return result.strip()
 
+def uintStr2localStr(input:str, voice_type:str = None, isSingle=False):
+    if isSingle==True or voice_type is None:
+        return uintStr2Str(input, isSingle)
 
-def floatStr2Str(input:str, dot=",", isPoweredNumber=False):
+    if voice_type == "male-north":
+        uintStr = uintStr2Str(input)
+        uintStrList = uintStr.split(" ")
+        if len(uintStrList) >= 3 and uintStrList[-3] == "hai":
+            uintStrList[-3] = "hăm"
+        if len(uintStrList) >= 3 and uintStrList[-2] == "mươi":
+            uintStrList.pop(-2)
+        return " ".join(uintStrList)
+
+    elif voice_type == "male-south":
+        uintStr = uintStr2Str(input)
+        uintStr = uintStr.replace("nghìn", "ngàn")
+        uintStrList = uintStr.split(" ")
+        if len(uintStrList) >= 4 and uintStrList[-2] == "linh":
+            uintStrList[-2] = "lẻ"
+        if len(uintStrList) >= 2 and uintStrList[-1] == "mươi":
+            uintStrList[-1] = "chục"
+        return " ".join(uintStrList)
+  
+    elif voice_type == "female-north":
+        uintStr = uintStr2Str(input)
+        uintStrList = uintStr.split(" ")
+        if len(uintStrList) >= 2 and uintStrList[-1] == "mươi":
+            uintStrList[-1] = "chục"
+        if len(uintStrList) >= 3 and uintStrList[-2] == "mươi":
+            uintStrList.pop(-2)
+        return " ".join(uintStrList)
+
+    elif voice_type == "female-south":
+        return uintStr2Str(input)
+
+    elif voice_type == "female-central":
+        uintStr = uintStr2Str(input, True)
+        uintStrList = uintStr.split(" ")
+        if len(uintStrList) >= 2 and uintStrList[-1] == "một":
+            uintStrList[-1] = "mốt"
+        return " ".join(uintStrList)
+  
+    else:
+        warnings.warn(f"Voice type '{voice_type}' is not supported... Using standard converter!")
+        return uintStr2Str(input)
+
+def floatStr2Str(input:str, dot=",", voice_type:str = None, isPoweredNumber=False):
     result = ""
     if len(input)>0:
         signStr = ""
@@ -180,171 +225,10 @@ def floatStr2Str(input:str, dot=",", isPoweredNumber=False):
             single = True
             if (len(parts[1])<7):
                 single = False
-            result = signStr + uintStr2Str(parts[0]) + " phẩy " + uintStr2Str(parts[1], single)
+            result = signStr + uintStr2localStr(parts[0], voice_type) + " phẩy " + uintStr2localStr(parts[1], voice_type, isSingle=single)
         else:
-            result = signStr + uintStr2Str(parts[0])
+            result = signStr + uintStr2localStr(parts[0], voice_type)
     return result
-
-
-def doubleStr2Str(input:str, dot=","):
-    input = input.lower()
-    parts = input.split("e")
-    if (len(parts)>1):
-        return floatStr2Str(parts[0], dot) + " nhân mười mũ " + floatStr2Str(parts[1], dot, True)
-    else:
-        return floatStr2Str(parts[0], dot)
-
-
-# replace 00/00/0000
-def _replace_full_date(m):
-    return " ngày " + doubleStr2Str(m.group(1)) + " tháng " + doubleStr2Str(m.group(2)) + " năm " + doubleStr2Str(m.group(3)) + " "
-
-
-# replace 00/00/0000
-def _replace_short_date(m):
-    return " ngày " + doubleStr2Str(m.group(1)) + " tháng " + doubleStr2Str(m.group(2)) + " " 
-
-
-# replace 000:00:00
-def _replace_full_time(m):
-    return " " + doubleStr2Str(m.group(1)) + " giờ " + doubleStr2Str(m.group(2)) + " phút " + doubleStr2Str(m.group(3)) + " giây "
-
-
-# replace 000:00
-def _replace_short_time_1(m):
-    return " " + doubleStr2Str(m.group(1)) + " giờ " + doubleStr2Str(m.group(2)) + " phút "
-
-
-# replace 000h00
-def _replace_short_time_2(m):
-    return " " + doubleStr2Str(m.group(1)) + " giờ " + doubleStr2Str(m.group(2)) + " phút "       
-
-
-def _replace_number_range(m):
-    return " từ " + m.group(1) + " đến " + m.group(2)
-
-
-def _replace_coner(m):
-    return " " + doubleStr2Str(m.group(1)) + " độ " + doubleStr2Str(m.group(2)) + " phút " + doubleStr2Str(m.group(3)) + " giây "
-
-
-def _replace_number(m):
-    # print(str(len(m.groups())) + ": " + str(m.group(2)))
-    if (len(m.groups())>1 and m.group(2) is not None):
-        orgUnit = m.group(2)
-        unit = "" # vnd|d|m|kg|g|k|b|kb|mb|gb|tb|°c|°k
-        if orgUnit == 'vnd' or orgUnit == 'd':
-            unit = 'đồng'
-        elif orgUnit == 'km':
-            unit = 'kilô mét'
-        elif orgUnit == 'm':
-            unit = 'mét'
-        elif orgUnit == 'dm':
-            unit = 'đềxi mét'
-        elif orgUnit == 'cm':
-            unit = 'xenti mét'
-        elif orgUnit == 'mm':
-            unit = 'mili mét'
-        elif orgUnit == 'kg':
-            unit = 'kilô gram'
-        elif orgUnit == 'g':
-            unit = 'gram'
-        elif orgUnit == 'mg':
-            unit = 'mili gram'
-        elif orgUnit == 'k':
-            unit = 'nghìn'
-        elif orgUnit == 'b':
-            unit = 'bai'
-        elif orgUnit == 'kb':
-            unit = 'kilô bai'
-        elif orgUnit == 'mb':
-            unit = 'mêga bai'
-        elif orgUnit == 'gb':
-            unit = 'giga bai'
-        elif orgUnit == 'tb':
-            unit = 'tera bai'
-        elif orgUnit == '°c' or orgUnit == 'ºc':
-            unit = 'độ xê'
-        elif orgUnit == '°k' or orgUnit == 'ºk':
-            unit = 'độ kenvin'
-        elif orgUnit == 's':
-            unit = 'giây'
-        elif orgUnit == 'a':
-            unit = 'ampe'
-        elif orgUnit == 'ma':
-            unit = 'mili ampe'
-        elif orgUnit == 'hz':
-            unit = 'héc'
-        elif orgUnit == 'w':
-            unit = 'oát'
-        elif orgUnit == 'kw':
-            unit = 'kilô oát'
-        elif orgUnit == 'mw':
-            unit = 'mêga oát'
-        elif orgUnit == 'j':
-            unit = 'giun'
-        elif orgUnit == 'kj':
-            unit = 'kilô giun'
-        elif orgUnit == 'tj':
-            unit = 'tera giun'
-        elif orgUnit == 'v':
-            unit = 'vôn'
-        elif orgUnit == 'kv':
-            unit = 'kilô vôn'
-        elif orgUnit == 'lm':
-            unit = 'lumen'
-        elif orgUnit == 'pa':
-            unit = 'pátcan'
-        elif orgUnit == 'rad':
-            unit = 'rađian'
-        elif orgUnit == 'va':
-            unit = 'vôn ampe'
-        elif orgUnit == 'km/h':
-            unit = 'kilô mét trên giờ'
-        elif orgUnit == 'm/s':
-            unit = 'mét trên giây'
-        elif orgUnit == 'f':
-            unit = 'phara'
-        elif orgUnit == 'n':
-            unit = 'niutơn'
-        elif orgUnit == 'm2':
-            unit = 'mét vuông'
-        elif orgUnit == 'm3':
-            unit = 'mét khối'
-        elif orgUnit == 'l':
-            unit = 'lít'
-        elif orgUnit == 'rad/s':
-            unit = 'rađian trên giây'
-        elif orgUnit == 'l/km':
-            unit = 'lít trên kilômét'
-        elif orgUnit == 'kg/m3':
-            unit = 'kilôgram trên mét khối'
-        elif orgUnit == 'm3/s':
-            unit = 'mét khối trên giây'
-        elif orgUnit == 'h':
-            unit = 'henri'
-        elif orgUnit == 'w/m2':
-            unit = 'oát trên mét vuông'
-        elif orgUnit == 'mol':
-            unit = 'mon'
-        elif orgUnit == 'ω':
-            unit = 'ôm'
-        elif orgUnit == 'kω':
-            unit = 'kilô ôm'
-        elif orgUnit == 'mω':
-            unit = 'mêga ôm'
-        elif orgUnit == 't':
-            unit = 'tấn'
-        elif orgUnit == '°' or orgUnit=='º':
-            unit = 'độ'
-        elif orgUnit == 'ev':
-            unit = 'êlêctrôn vôn'
-        elif orgUnit == '%':
-            unit = 'phần trăm'
-        return " " + doubleStr2Str(m.group(1)) + " " + unit + " "
-    else:
-        return " " + doubleStr2Str(m.group(1)) + " "         
-
 
 def _remove_commas(m):
     return m.group(1).replace('.', '')
@@ -361,31 +245,6 @@ def _expand_roman(m):
         else:
             result -= roman_numerals[c]
     return str(result)
-
-
-def normalize_numbers(text:str):
-    #roman number
-    text = re.sub(_roman_re, _expand_roman, text)
-    # range
-    text = re.sub(_number_range_re, _replace_number_range, text)
-    # lower
-    text = text.lower()
-    # remove comma
-    text = re.sub(_comma_number_re, _remove_commas, text)
-    # full date
-    text = re.sub(_full_date_re, _replace_full_date, text)
-    text = re.sub(_short_date_re, _replace_short_date, text)
-    # full time
-    text = re.sub(_full_time_re, _replace_full_time, text)
-    # short time
-    text = re.sub(_short_time1_re, _replace_short_time_1, text)
-    text = re.sub(_short_time2_re, _replace_short_time_2, text)
-    # coner
-    text = re.sub(_coner_re, _replace_coner, text)
-    # number and unit
-    text = re.sub(_general_number_re, _replace_number, text)
-    # return result
-    return re.sub(_whitespace_re, ' ', text)
 
 def expand_abbreviations_vi(text):
     for regex, replacement in _abbreviations_vi:
@@ -408,24 +267,205 @@ def read_file_to_tuples(file_path):
     return data_label_pairs
 
 class NewsCleaner():
-    def __init__(self, foreign_path):
-        word_spelling_pairs = read_file_to_tuples(foreign_path)
-        self.foreign_regex_pairs = [(re.compile('\\b%s\\.' % x[0], re.IGNORECASE), x[1]) for x in word_spelling_pairs]
+    def __init__(self, foreign_path=None):
+        if not foreign_path:
+            self.foreign_regex_pairs = None
+        else:
+            word_spelling_pairs = read_file_to_tuples(foreign_path)
+            self.foreign_regex_pairs = [(re.compile('\\b%s\\.' % x[0], re.IGNORECASE), x[1]) for x in word_spelling_pairs]
+        self.voice_type = None
 
-    def cleaner(self, text):
+    def cleaner(self, text, voice_type = None):
+        self.voice_type = voice_type
+
         '''pipeline for vietnamese text, including number and abbreviation expansion.'''
-        text = normalize_numbers(text)
+        text = self.normalize_numbers(text)
         text = expand_abbreviations_vi(text)
-        for regex, replacement in self.foreign_regex_pairs:
-            text = re.sub(regex, replacement, text)
+        if self.foreign_regex_pairs:
+            for regex, replacement in self.foreign_regex_pairs:
+                text = re.sub(regex, replacement, text)
         text = collapse_whitespace(text)
         text = text_normalize.text_normalize(text)
         return text
 
-def cleaner(text):
-    '''pipeline for vietnamese text, including number and abbreviation expansion.'''
-    text = normalize_numbers(text)
-    text = expand_abbreviations_vi(text)
-    text = collapse_whitespace(text)
-    text = text_normalize(text)
-    return text
+    def doubleStr2Str(self, input:str, dot=","):
+        input = input.lower()
+        parts = input.split("e")
+        if (len(parts)>1):
+            return floatStr2Str(parts[0], dot, self.voice_type) + " nhân mười mũ " + floatStr2Str(parts[1], dot, self.voice_type, True)
+        else:
+            return floatStr2Str(parts[0], dot, self.voice_type)
+
+    # replace 00/00/0000
+    def _replace_full_date(self, m):
+        return " ngày " + self.doubleStr2Str(m.group(1)) + " tháng " + self.doubleStr2Str(m.group(2)) + " năm " + self.doubleStr2Str(m.group(3)) + " "
+
+
+    # replace 00/00/0000
+    def _replace_short_date(self, m):
+        return " ngày " + self.doubleStr2Str(m.group(1)) + " tháng " + self.doubleStr2Str(m.group(2)) + " " 
+
+
+    # replace 000:00:00
+    def _replace_full_time(self, m):
+        return " " + self.doubleStr2Str(m.group(1)) + " giờ " + self.doubleStr2Str(m.group(2)) + " phút " + self.doubleStr2Str(m.group(3)) + " giây "
+
+
+    # replace 000:00
+    def _replace_short_time_1(self, m):
+        return " " + self.doubleStr2Str(m.group(1)) + " giờ " + self.doubleStr2Str(m.group(2)) + " phút "
+
+
+    # replace 000h00
+    def _replace_short_time_2(self, m):
+        return " " + self.doubleStr2Str(m.group(1)) + " giờ " + self.doubleStr2Str(m.group(2)) + " phút "       
+
+
+    def _replace_number_range(self, m):
+        return " từ " + m.group(1) + " đến " + m.group(2)
+
+
+    def _replace_coner(self, m):
+        return " " + self.doubleStr2Str(m.group(1)) + " độ " + self.doubleStr2Str(m.group(2)) + " phút " + self.doubleStr2Str(m.group(3)) + " giây "
+
+
+    def _replace_number(self, m):
+        # print(str(len(m.groups())) + ": " + str(m.group(2)))
+        if (len(m.groups())>1 and m.group(2) is not None):
+            orgUnit = m.group(2)
+            unit = "" # vnd|d|m|kg|g|k|b|kb|mb|gb|tb|°c|°k
+            if orgUnit == 'vnd' or orgUnit == 'd':
+                unit = 'đồng'
+            elif orgUnit == 'km':
+                unit = 'kilô mét'
+            elif orgUnit == 'm':
+                unit = 'mét'
+            elif orgUnit == 'dm':
+                unit = 'đềxi mét'
+            elif orgUnit == 'cm':
+                unit = 'xenti mét'
+            elif orgUnit == 'mm':
+                unit = 'mili mét'
+            elif orgUnit == 'kg':
+                unit = 'kilô gram'
+            elif orgUnit == 'g':
+                unit = 'gram'
+            elif orgUnit == 'mg':
+                unit = 'mili gram'
+            elif orgUnit == 'k':
+                unit = 'nghìn'
+            elif orgUnit == 'b':
+                unit = 'bai'
+            elif orgUnit == 'kb':
+                unit = 'kilô bai'
+            elif orgUnit == 'mb':
+                unit = 'mêga bai'
+            elif orgUnit == 'gb':
+                unit = 'giga bai'
+            elif orgUnit == 'tb':
+                unit = 'tera bai'
+            elif orgUnit == '°c' or orgUnit == 'ºc':
+                unit = 'độ xê'
+            elif orgUnit == '°k' or orgUnit == 'ºk':
+                unit = 'độ kenvin'
+            elif orgUnit == 's':
+                unit = 'giây'
+            elif orgUnit == 'a':
+                unit = 'ampe'
+            elif orgUnit == 'ma':
+                unit = 'mili ampe'
+            elif orgUnit == 'hz':
+                unit = 'héc'
+            elif orgUnit == 'w':
+                unit = 'oát'
+            elif orgUnit == 'kw':
+                unit = 'kilô oát'
+            elif orgUnit == 'mw':
+                unit = 'mêga oát'
+            elif orgUnit == 'j':
+                unit = 'giun'
+            elif orgUnit == 'kj':
+                unit = 'kilô giun'
+            elif orgUnit == 'tj':
+                unit = 'tera giun'
+            elif orgUnit == 'v':
+                unit = 'vôn'
+            elif orgUnit == 'kv':
+                unit = 'kilô vôn'
+            elif orgUnit == 'lm':
+                unit = 'lumen'
+            elif orgUnit == 'pa':
+                unit = 'pátcan'
+            elif orgUnit == 'rad':
+                unit = 'rađian'
+            elif orgUnit == 'va':
+                unit = 'vôn ampe'
+            elif orgUnit == 'km/h':
+                unit = 'kilô mét trên giờ'
+            elif orgUnit == 'm/s':
+                unit = 'mét trên giây'
+            elif orgUnit == 'f':
+                unit = 'phara'
+            elif orgUnit == 'n':
+                unit = 'niutơn'
+            elif orgUnit == 'm2':
+                unit = 'mét vuông'
+            elif orgUnit == 'm3':
+                unit = 'mét khối'
+            elif orgUnit == 'l':
+                unit = 'lít'
+            elif orgUnit == 'rad/s':
+                unit = 'rađian trên giây'
+            elif orgUnit == 'l/km':
+                unit = 'lít trên kilômét'
+            elif orgUnit == 'kg/m3':
+                unit = 'kilôgram trên mét khối'
+            elif orgUnit == 'm3/s':
+                unit = 'mét khối trên giây'
+            elif orgUnit == 'h':
+                unit = 'henri'
+            elif orgUnit == 'w/m2':
+                unit = 'oát trên mét vuông'
+            elif orgUnit == 'mol':
+                unit = 'mon'
+            elif orgUnit == 'ω':
+                unit = 'ôm'
+            elif orgUnit == 'kω':
+                unit = 'kilô ôm'
+            elif orgUnit == 'mω':
+                unit = 'mêga ôm'
+            elif orgUnit == 't':
+                unit = 'tấn'
+            elif orgUnit == '°' or orgUnit=='º':
+                unit = 'độ'
+            elif orgUnit == 'ev':
+                unit = 'êlêctrôn vôn'
+            elif orgUnit == '%':
+                unit = 'phần trăm'
+            return " " + self.doubleStr2Str(m.group(1)) + " " + unit + " "
+        else:
+            return " " + self.doubleStr2Str(m.group(1)) + " "         
+
+    def normalize_numbers(self, text:str):
+        #roman number
+        text = re.sub(_roman_re, _expand_roman, text)
+        # range
+        text = re.sub(_number_range_re, self._replace_number_range, text)
+        # lower
+        text = text.lower()
+        # remove comma
+        text = re.sub(_comma_number_re, _remove_commas, text)
+        # full date
+        text = re.sub(_full_date_re, self._replace_full_date, text)
+        text = re.sub(_short_date_re, self._replace_short_date, text)
+        # full time
+        text = re.sub(_full_time_re, self._replace_full_time, text)
+        # short time
+        text = re.sub(_short_time1_re, self._replace_short_time_1, text)
+        text = re.sub(_short_time2_re, self._replace_short_time_2, text)
+        # coner
+        text = re.sub(_coner_re, self._replace_coner, text)
+        # number and unit
+        text = re.sub(_general_number_re, self._replace_number, text)
+        # return result
+        return re.sub(_whitespace_re, ' ', text)

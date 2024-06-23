@@ -82,12 +82,19 @@ async def tts_real(article: Article):
     if len(article.content.strip()) == 0:
         return {"message": "error: no content to generate audio!"}
 
-    text = model["cleaner"].cleaner(article.content)
-
+    text = model["cleaner"].cleaner(article.content, voice_type="male-north")
     model["male-north"].inference(text, f"audio/{article.folder_name}/male-north.wav")
+
+    text = model["cleaner"].cleaner(article.content, voice_type="male-south")
     model["male-south"].inference(text, f"audio/{article.folder_name}/male-south.wav")
+
+    text = model["cleaner"].cleaner(article.content, voice_type="female-north")
     model["female-north"].inference(text, f"audio/{article.folder_name}/female-north.wav")
+
+    text = model["cleaner"].cleaner(article.content, voice_type="female-south")
     model["female-south"].inference(text, f"audio/{article.folder_name}/female-south.wav")
+
+    text = model["cleaner"].cleaner(article.content, voice_type="female-central")
     model["female-central"].inference(text, f"audio/{article.folder_name}/female-central.wav")
     
     return {"message": "success!"}
