@@ -328,7 +328,7 @@ async def delete_news(id: int, current_user: User = Depends(get_current_user)):
         (content, path_audio) = item
 
         tts_api = "http://tts_service:3000/tts"
-        response = requests.post(url=tts_api, json={"content": content, "folder_name": path_audio}, timeout=120)
+        response = requests.post(url=tts_api, json={"content": content, "folder_name": path_audio}, timeout=300)
 
         if response.status_code == 200:
             return {"message": "Generate audio successfully"}

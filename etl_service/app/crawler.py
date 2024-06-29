@@ -208,12 +208,9 @@ def crawl():
     etl_dantri()
     etl_tienphong()
 
-# For testing
-crawl()
+schedule.every().hours.do(crawl)
 
-# schedule.every(1).minutes.do(crawl)
-
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
+while True:
+    schedule.run_pending()
+    time.sleep(1)
         
