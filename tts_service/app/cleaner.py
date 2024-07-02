@@ -19,7 +19,7 @@ _number_range_re = re.compile(r'(\d+(?:,\d+)?)\s*[-–-]\s*(\d+(?:,\d+)?)')
 _whitespace_re = re.compile(r'\s+')
 
 # List of (regular expression, replacement) pairs for abbreviations:
-_abbreviations_vi = [(re.compile('\\b%s\\.' % x[0], re.IGNORECASE), x[1]) for x in [
+_abbreviations_vi = [(re.compile(r'\b%s\b' % x[0], re.IGNORECASE), x[1]) for x in [
     ('btc', 'ban tổ chức'),
     ('clb', 'câu lạc bộ'),
     ('htx', 'hợp tác xã'),
@@ -272,7 +272,7 @@ class NewsCleaner():
             self.foreign_regex_pairs = None
         else:
             word_spelling_pairs = read_file_to_tuples(foreign_path)
-            self.foreign_regex_pairs = [(re.compile('\\b%s\\.' % x[0], re.IGNORECASE), x[1]) for x in word_spelling_pairs]
+            self.foreign_regex_pairs = [(re.compile(r'\b%s\b' % x[0], re.IGNORECASE), x[1]) for x in word_spelling_pairs]
         self.voice_type = None
 
     def cleaner(self, text, voice_type = None):
