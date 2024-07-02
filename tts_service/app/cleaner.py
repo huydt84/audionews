@@ -337,77 +337,77 @@ class NewsCleaner():
             if orgUnit == 'vnd' or orgUnit == 'd':
                 unit = 'đồng'
             elif orgUnit == 'km':
-                unit = 'kilô mét'
+                unit = 'ki lô mét'
             elif orgUnit == 'm':
                 unit = 'mét'
             elif orgUnit == 'dm':
-                unit = 'đềxi mét'
+                unit = 'đề xi mét'
             elif orgUnit == 'cm':
-                unit = 'xenti mét'
+                unit = 'xen ti mét'
             elif orgUnit == 'mm':
-                unit = 'mili mét'
+                unit = 'mi li mét'
             elif orgUnit == 'kg':
-                unit = 'kilô gram'
+                unit = 'ki lô gờ ram'
             elif orgUnit == 'g':
-                unit = 'gram'
+                unit = 'gờ ram'
             elif orgUnit == 'mg':
-                unit = 'mili gram'
+                unit = 'mi li gờ ram'
             elif orgUnit == 'k':
                 unit = 'nghìn'
             elif orgUnit == 'b':
                 unit = 'bai'
             elif orgUnit == 'kb':
-                unit = 'kilô bai'
+                unit = 'ki lô bai'
             elif orgUnit == 'mb':
-                unit = 'mêga bai'
+                unit = 'mê ga bai'
             elif orgUnit == 'gb':
-                unit = 'giga bai'
+                unit = 'ghi ga bai'
             elif orgUnit == 'tb':
-                unit = 'tera bai'
+                unit = 'tê ra bai'
             elif orgUnit == '°c' or orgUnit == 'ºc':
                 unit = 'độ xê'
             elif orgUnit == '°k' or orgUnit == 'ºk':
-                unit = 'độ kenvin'
+                unit = 'độ ken vin'
             elif orgUnit == 's':
                 unit = 'giây'
             elif orgUnit == 'a':
-                unit = 'ampe'
+                unit = 'am pe'
             elif orgUnit == 'ma':
-                unit = 'mili ampe'
+                unit = 'mi li am pe'
             elif orgUnit == 'hz':
                 unit = 'héc'
             elif orgUnit == 'w':
                 unit = 'oát'
             elif orgUnit == 'kw':
-                unit = 'kilô oát'
+                unit = 'ki lô oát'
             elif orgUnit == 'mw':
-                unit = 'mêga oát'
+                unit = 'mê ga oát'
             elif orgUnit == 'j':
                 unit = 'giun'
             elif orgUnit == 'kj':
-                unit = 'kilô giun'
+                unit = 'ki lô giun'
             elif orgUnit == 'tj':
-                unit = 'tera giun'
+                unit = 'tê ra giun'
             elif orgUnit == 'v':
                 unit = 'vôn'
             elif orgUnit == 'kv':
-                unit = 'kilô vôn'
+                unit = 'ki lô vôn'
             elif orgUnit == 'lm':
-                unit = 'lumen'
+                unit = 'lu men'
             elif orgUnit == 'pa':
-                unit = 'pátcan'
+                unit = 'pát can'
             elif orgUnit == 'rad':
-                unit = 'rađian'
+                unit = 'ra đi an'
             elif orgUnit == 'va':
-                unit = 'vôn ampe'
+                unit = 'vôn am pe'
             elif orgUnit == 'km/h':
-                unit = 'kilô mét trên giờ'
+                unit = 'ki lô mét trên giờ'
             elif orgUnit == 'm/s':
                 unit = 'mét trên giây'
             elif orgUnit == 'f':
-                unit = 'phara'
+                unit = 'pha ra'
             elif orgUnit == 'n':
-                unit = 'niutơn'
+                unit = 'niu tơn'
             elif orgUnit == 'm2':
                 unit = 'mét vuông'
             elif orgUnit == 'm3':
@@ -415,15 +415,15 @@ class NewsCleaner():
             elif orgUnit == 'l':
                 unit = 'lít'
             elif orgUnit == 'rad/s':
-                unit = 'rađian trên giây'
+                unit = 'ra đi an trên giây'
             elif orgUnit == 'l/km':
-                unit = 'lít trên kilômét'
+                unit = 'lít trên ki lô mét'
             elif orgUnit == 'kg/m3':
-                unit = 'kilôgram trên mét khối'
+                unit = 'ki lô gờ ram trên mét khối'
             elif orgUnit == 'm3/s':
                 unit = 'mét khối trên giây'
             elif orgUnit == 'h':
-                unit = 'henri'
+                unit = 'hen ri'
             elif orgUnit == 'w/m2':
                 unit = 'oát trên mét vuông'
             elif orgUnit == 'mol':
@@ -431,15 +431,15 @@ class NewsCleaner():
             elif orgUnit == 'ω':
                 unit = 'ôm'
             elif orgUnit == 'kω':
-                unit = 'kilô ôm'
+                unit = 'ki lô ôm'
             elif orgUnit == 'mω':
-                unit = 'mêga ôm'
+                unit = 'mê ga ôm'
             elif orgUnit == 't':
                 unit = 'tấn'
             elif orgUnit == '°' or orgUnit=='º':
                 unit = 'độ'
             elif orgUnit == 'ev':
-                unit = 'êlêctrôn vôn'
+                unit = 'ê lếch trôn vôn'
             elif orgUnit == '%':
                 unit = 'phần trăm'
             return " " + self.doubleStr2Str(m.group(1)) + " " + unit + " "
