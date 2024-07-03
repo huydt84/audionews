@@ -65,7 +65,7 @@ def get_pagination(items, page_number=1, page_size=50):
 
 
 def get_existed_api_audio(folder_path: str, id: int, voice: Literal["male-north", "female-north", "male-south", "female-south", "female-central"]):
-    file_name = voice + ".wav"
+    file_name = voice + ".aac"
     audio_path = os.path.join("audio", folder_path, file_name)
 
     # Check if audio file was created
@@ -312,14 +312,16 @@ async def get_one(slug_url: str):
 @app.get("/api/news/audio/{id}/{voice}")
 async def get_audio(id: int, voice: Literal["male-north", "female-north", "male-south", "female-south", "female-central"]):
     folder_path = sql_session["session"].query(Article.path_audio).filter(Article.id == id).first()
-    file_name = voice + ".wav"
+    file_name = voice + ".aac"
     audio_path = os.path.join("audio", folder_path[0], file_name)
-
+    
     def iterfile():
         with open(audio_path, mode="rb") as file:
             yield from file
-
-    return StreamingResponse(iterfile(), media_type="audio/mpeg")
+    if os.path.exists(audio_path):
+        return StreamingResponse(iterfile(), media_type="audio/aac")
+    else:
+        print(f"{audio_path} does not exist!")
 
 @app.get("/api/news/generate-audio/{id}")
 async def delete_news(id: int, current_user: User = Depends(get_current_user)):

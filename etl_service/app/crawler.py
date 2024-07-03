@@ -203,14 +203,15 @@ def etl_tienphong():
 
 def crawl():
     print("Start Crawling!!!")
+    etl_tienphong()
     etl_vnexpress()
     etl_thanhnien()
     etl_dantri()
-    etl_tienphong()
+    
+# schedule.every().hours.do(crawl)
 
-schedule.every().hours.do(crawl)
-
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)
+crawl()
         
