@@ -13,16 +13,13 @@ from datetime import datetime, timedelta, timezone
 from typing_extensions import Annotated
 import jwt
 from jwt.exceptions import InvalidTokenError
-import requests
 
-import sqlalchemy
 from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker
 
 from config import config
+from worker import celery
 from models import Article, Admin
-
-requests.adapters.DEFAULT_RETRIES = 5
 
 class Token(BaseModel):
     access_token: str
@@ -325,17 +322,19 @@ async def get_audio(id: int, voice: Literal["male-north", "female-north", "male-
 
 @app.get("/api/news/generate-audio/{id}")
 async def delete_news(id: int, current_user: User = Depends(get_current_user)):
-    item = sql_session["session"].query(Article.content, Article.path_audio).filter(Article.id == id).first()
-    if item:
-        (content, path_audio) = item
+    try:
+        item = sql_session["session"].query(Article.content, Article.path_audio).filter(Article.id == id).first()
+        if item:
+            (content, path_audio) = item
 
-        tts_api = "http://tts_service:3000/tts"
-        response = requests.post(url=tts_api, json={"content": content, "folder_name": path_audio}, timeout=300)
+            celery.send_task(config["CELERY_TASK"], 
+                            args=[path_audio, content],
+                            queue="tasks")
 
-        if response.status_code == 200:
-            return {"message": "Generate audio successfully"}
+            return {"message": "Task sent to message queue successfully"}
+            
         else:
-            return {"message": "Something went wrong. Please try again later"}
-        
-    else:
-        return {"message": f"Article not found"}
+            return {"message": f"Article not found"}
+    except Exception as e:
+        print(e)
+        return {"message": "Something went wrong. Please try again later"}

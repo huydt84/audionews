@@ -1,12 +1,12 @@
 import time
 import datetime
 from dateutil.parser import parse
-import schedule
 import requests
 import feedparser
 from bs4 import BeautifulSoup
 import ftfy
 import uuid
+
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -38,7 +38,7 @@ def process_rss(rss_site: str, category: str, fix_text: bool = False):
         # Get time
         time_published = parse(entry.published)
         time_published = time_published.replace(tzinfo=None)
-        if now - time_published >= datetime.timedelta(hours=1):
+        if now - time_published >= datetime.timedelta(minutes=1):
             break
 
         # Get description
@@ -201,17 +201,15 @@ def etl_tienphong():
 
     return list_article
 
+
 def crawl():
-    print("Start Crawling!!!")
+    print(f"Start Crawling!!!")
     etl_tienphong()
     etl_vnexpress()
     etl_thanhnien()
     etl_dantri()
-    
-# schedule.every().hours.do(crawl)
 
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
-crawl()
+if __name__ == '__main__':
+    crawl()
+    
         

@@ -35,7 +35,7 @@ export function NewsTable({ currentPage }: Props) {
       await adminRegenerateNews(newsId)
 
       toast({
-        title: `Bắt đầu tạo audio cho bài viết ${newsId}.`
+        title: `Bắt đầu tạo audio cho bài viết ${newsId}. Đã gửi vào hàng đợi.`
       })
     })
   }
