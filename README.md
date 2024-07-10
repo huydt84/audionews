@@ -1,5 +1,9 @@
 # Hệ thống đọc tin tức giọng ba miền
 
+## Kiến trúc tổng quan
+
+![image](https://github.com/huydt84/audionews/assets/77562200/3cfa0ce7-3d57-4312-a0de-1a3940dd9e31)
+
 
 ## Yêu cầu hệ thống:
 Đã cài đặt Docker
