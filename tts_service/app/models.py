@@ -6,7 +6,7 @@ import numpy as np
 import onnxruntime
 from typing import List, Literal
 from piper_phonemize import phonemize_espeak, tashkeel_run
-import scipy
+# import scipy
 from pydub import AudioSegment
 
 class TTS():
@@ -50,7 +50,9 @@ class TTS():
             combined_audio = sum(all_audio_segments[:-1])  # Remove last silence
             combined_audio_array = np.array(combined_audio.get_array_of_samples())
         
-        scipy.io.wavfile.write(audio_path, self.SAMPLE_RATE, combined_audio_array)
+        # scipy.io.wavfile.write(audio_path, self.SAMPLE_RATE, combined_audio_array)
+        voice = AudioSegment(combined_audio_array.tobytes(), frame_rate=self.SAMPLE_RATE, sample_width=audio.dtype.itemsize, channels=1)
+        voice.export(audio_path, format="adts", bitrate="192k")
 
     def inference_sentence(self, text, chunk_size=100):
         text = text.strip()

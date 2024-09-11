@@ -11,8 +11,8 @@ export const formatTime = (time: Date) => {
     relativeTime: {
       future: 'trong %s',
       past: '%s trước',
-      s: 'a vài giây',
-      m: 'a phút',
+      s: 'vài giây',
+      m: 'một phút',
       mm: '%d phút',
       h: 'một giờ',
       hh: '%d giờ',

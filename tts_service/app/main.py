@@ -52,50 +52,31 @@ async def read_root():
     return {"Hello": "World"}
 
 @app.post("/tts")
-async def tts(article: Article):
-    os.makedirs(f"audio/{article.folder_name}", exist_ok=True)
-
-    with open("WAV_2mb.wav", "rb") as f:
-        audio = f.read()
-
-    with open(f"audio/{article.folder_name}/male-north.wav", "wb") as f:
-        f.write(audio)
-    
-    with open(f"audio/{article.folder_name}/female-north.wav", "wb") as f:
-        f.write(audio)
-
-    with open(f"audio/{article.folder_name}/male-south.wav", "wb") as f:
-        f.write(audio)
-
-    with open(f"audio/{article.folder_name}/female-south.wav", "wb") as f:
-        f.write(audio)
-
-    with open(f"audio/{article.folder_name}/female-central.wav", "wb") as f:
-        f.write(audio)
-
-    return {"message": "success!"}
-
-@app.post("/tts-real")
 async def tts_real(article: Article):
     os.makedirs(f"audio/{article.folder_name}", exist_ok=True)
+    print(f"Audio is generated at audio/{article.folder_name}")
+    print(article.content[:50])
 
     if len(article.content.strip()) == 0:
+        print({"message": "error: no content to generate audio!"})
         return {"message": "error: no content to generate audio!"}
 
+    print("Start generating...")
     text = model["cleaner"].cleaner(article.content, voice_type="male-north")
-    model["male-north"].inference(text, f"audio/{article.folder_name}/male-north.wav")
+    model["male-north"].inference(text, f"audio/{article.folder_name}/male-north.aac")
 
     text = model["cleaner"].cleaner(article.content, voice_type="male-south")
-    model["male-south"].inference(text, f"audio/{article.folder_name}/male-south.wav")
+    model["male-south"].inference(text, f"audio/{article.folder_name}/male-south.aac")
 
     text = model["cleaner"].cleaner(article.content, voice_type="female-north")
-    model["female-north"].inference(text, f"audio/{article.folder_name}/female-north.wav")
+    model["female-north"].inference(text, f"audio/{article.folder_name}/female-north.aac")
 
     text = model["cleaner"].cleaner(article.content, voice_type="female-south")
-    model["female-south"].inference(text, f"audio/{article.folder_name}/female-south.wav")
+    model["female-south"].inference(text, f"audio/{article.folder_name}/female-south.aac")
 
     text = model["cleaner"].cleaner(article.content, voice_type="female-central")
-    model["female-central"].inference(text, f"audio/{article.folder_name}/female-central.wav")
+    model["female-central"].inference(text, f"audio/{article.folder_name}/female-central.aac")
+    print("Stop generating...")
     
     return {"message": "success!"}
 

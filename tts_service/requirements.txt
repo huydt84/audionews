@@ -1,7 +1,7 @@
 fastapi
 uvicorn
 pydantic
-scipy
+# scipy
 numpy<2
 piper-phonemize
 onnxruntime

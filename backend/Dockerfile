@@ -4,7 +4,7 @@ ENV LANG="C.UTF-8"
 
 COPY ./requirements.txt /tmp/requirements.txt
 
-RUN python -m pip install -U --no-cache-dir pip && pip install --no-cache-dir --upgrade -r /tmp/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /tmp/requirements.txt
 
 WORKDIR /app
 
